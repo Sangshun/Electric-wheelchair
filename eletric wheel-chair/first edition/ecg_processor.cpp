@@ -63,7 +63,7 @@ public:
                filtered[i] > filtered[i+1]) 
             {
                 auto now = system_clock::now();
-                if(last_r_peak != time_point<system_clock>()) {  // �޸ıȽϷ�ʽ
+                if(last_r_peak != time_point<system_clock>()) { 
                     auto interval = duration_cast<milliseconds>(now - last_r_peak);
                     heart_rate = 60000.0 / interval.count();
                 }
@@ -80,51 +80,6 @@ private:
     double heart_rate;
 };
 
-int main() {
-    const char* port = "/dev/ttyUSB0";
-    int fd = open(port, O_RDWR | O_NOCTTY);
-    
-    if(fd == -1) {
-        cerr << "Error opening serial port" << endl;
-        return 1;
-    }
-
-    struct termios tty;
-    tcgetattr(fd, &tty);
-    cfsetospeed(&tty, B115200);
-    cfsetispeed(&tty, B115200);
-    tty.c_cflag &= ~PARENB;
-    tty.c_cflag &= ~CSTOPB;
-    tty.c_cflag &= ~CSIZE;
-    tty.c_cflag |= CS8;
-    tcsetattr(fd, TCSANOW, &tty);
-    //
-    //system("libcamera-vid -t 0 --width 1920 --height 1080 "
-    // "--codec yuv420 --inline | ffmpeg -i - -f v4l2 /dev/video0");
-
-    //system("cd /home/pi/Desktop && sudo ./syn6288_test");
-    //
-    ECGProcessor processor;
-    vector<double> ecg_buffer;
-    
-    while(true) {
-        uint8_t raw_data[BUFFER_SIZE];
-        int n = read(fd, raw_data, BUFFER_SIZE);
-        
-        for(int i=0; i<n; i+=2) {
-            if(i+1 >= n) break;
-            int16_t sample = (raw_data[i+1] << 8) | raw_data[i];
-            ecg_buffer.push_back(sample * 0.0025);
-        }
-
-        if(ecg_buffer.size() >= SAMPLE_RATE) {
-            processor.process(ecg_buffer);
-            ecg_buffer.clear();
-            cout << "the heart rating is : " << processor.get_heart_rate() << " BPM" << endl;
-        }
-
-        usleep(1000);
-    }
 
     close(fd);
     return 0;
