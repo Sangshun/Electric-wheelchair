@@ -7,12 +7,3 @@ Collaborators:
 3.Sangshun: Ziyao Ji 2968717J
 4.ccliuup: Chaoyu Liu 2978613L
 5.Doltonz: Jiaming Zhang 2970743Z
-
-
-Explanation of first edition code:
-We didn't know how to do version control at first, so the first version of the code was submitted by one member Ziyao Ji (2968717J). The division of the code is as follows.
-1. Ziyao Ji (2968717J) completed camera_preview.cpp and guangmin.cpp
-2. Chaoyu Liu (2978613L) completed ecg_processor.cpp
-3. Jiacheng Yu (3028341Y) completed pir_sensor.cpp and structure design
-4. Cunhui Hu (2986514H) completed syn6288_test.cpp and yuyin.cpp
-5. Jiaming Zhang (2970743Z) completed uitrasonic.cpp
