@@ -103,36 +103,24 @@ float UltrasonicSensor::measure_pulse() {
     return distance;
 }
 
-        timeout_start = getMicrotime();
-        while (gpiod_line_get_value(echo_line) == 1) {
-            if (getMicrotime() - timeout_start > TIMEOUT_US) {
-                timeout = 1;
-                break;
-            }
-            if (!keep_running) break;  // Allow early exit
-        }
-        if (timeout || !keep_running) continue;
-        end_time = getMicrotime();
+void UltrasonicSensor::cleanup_gpio() {
+    if (trig_line_) {
+        gpiod_line_set_value(trig_line_, 0);
+        gpiod_line_release(trig_line_);
+    }
+    if (echo_line_) gpiod_line_release(echo_line_);
+    if (chip_) gpiod_chip_close(chip_);
+}
 
-        long duration = end_time - start_time;
-        float distance = (duration * 0.0343) / 2;
+float UltrasonicSensor::get_distance() {
+    std::lock_guard<std::mutex> lock(gpio_mutex_);
+    trigger_pulse();
 
-        if (distance <= MAX_DISTANCE_CM) {
-            printf("Distance: %.2f cm\n", distance);
-        } else {
-            printf("Out of range\n");
-        }
+    float distance = measure_pulse();  
 
-        usleep(200000);
+    if (distance < 2 || distance > 450) { 
+        return -1;
     }
 
-    // Cleanup resources properly
-    printf("\nCleaning up GPIO resources...\n");
-    gpiod_line_set_value(trig_line, 0);
-    gpiod_line_release(trig_line);
-    gpiod_line_release(echo_line);
-    gpiod_chip_close(chip);
-    
-    printf("Program terminated safely.\n");
-    return EXIT_SUCCESS;
+    return distance;
 }
