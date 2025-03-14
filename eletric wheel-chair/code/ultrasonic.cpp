@@ -1,51 +1,73 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <time.h>
-#include <sys/time.h>
-#include <gpiod.h>
-#include <signal.h>  // Add signal handling
+#include "UltrasonicSensor.hpp"
+#include <chrono>
+#include <thread>
+#include <stdexcept>
+#include <csignal>
+#include <iostream>
+#include <ctime>
 
-#define TRIG_PIN 23
-#define ECHO_PIN 24
-#define MAX_DISTANCE_CM 400
-#define TIMEOUT_US 38000
+std::atomic<bool> UltrasonicSensor::running{true};
 
-// Global flag for signal handling
-volatile sig_atomic_t keep_running = 1;
-
-long getMicrotime() {
-    struct timeval currentTime;
-    gettimeofday(&currentTime, NULL);
-    return currentTime.tv_sec * 1000000 + currentTime.tv_usec;
+UltrasonicSensor::UltrasonicSensor(int trig_pin, int echo_pin)
+    : trig_pin_(trig_pin), echo_pin_(echo_pin) {
+    initialize_gpio();
 }
 
-// Signal handler for clean exit
-void sigint_handler(int sig) {
-    keep_running = 0;
+UltrasonicSensor::~UltrasonicSensor() {
+    cleanup_gpio();
 }
 
-int main() {
-    struct gpiod_chip *chip;
-    struct gpiod_line *trig_line, *echo_line;
-    int err;
+void UltrasonicSensor::signal_handler(int signal) {
+    (void)signal;
+    running.store(false, std::memory_order_release);
+}
 
-    // Register signal handler
-    signal(SIGINT, sigint_handler);
+void UltrasonicSensor::reset_gpio() {
+    gpiod_line_release(echo_line_);
+    echo_line_ = gpiod_chip_get_line(chip_, echo_pin_);
+    if (gpiod_line_request_both_edges_events(echo_line_, "echo") < 0) {
+        throw std::runtime_error("Failed to reconfigure Echo");
+    }
+}
 
-    chip = gpiod_chip_open_by_name("gpiochip0");
-    if (!chip) {
-        perror("Failed to open GPIO chip");
-        return EXIT_FAILURE;
+void UltrasonicSensor::initialize_gpio() {
+    chip_ = gpiod_chip_open_by_name("gpiochip0");
+    if (!chip_) throw std::runtime_error("Failed to open GPIO chip");
+
+    trig_line_ = gpiod_chip_get_line(chip_, trig_pin_);
+    echo_line_ = gpiod_chip_get_line(chip_, echo_pin_);
+    if (!trig_line_ || !echo_line_) {
+        cleanup_gpio();
+        throw std::runtime_error("Failed to get GPIO lines");
     }
 
-    trig_line = gpiod_chip_get_line(chip, TRIG_PIN);
-    echo_line = gpiod_chip_get_line(chip, ECHO_PIN);
-    if (!trig_line || !echo_line) {
-        perror("Failed to get GPIO lines");
-        gpiod_chip_close(chip);
-        return EXIT_FAILURE;
+    if (gpiod_line_request_output(trig_line_, "trig", 0) < 0) {
+        cleanup_gpio();
+        throw std::runtime_error("Failed to configure Trig");
     }
+
+    
+    if (gpiod_line_request_both_edges_events(echo_line_, "echo") < 0) {
+        cleanup_gpio();
+        throw std::runtime_error("Failed to configure Echo");
+    }
+}
+
+void UltrasonicSensor::trigger_pulse() const {
+    gpiod_line_set_value(trig_line_, 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(2)); 
+    gpiod_line_set_value(trig_line_, 1);
+    std::this_thread::sleep_for(std::chrono::microseconds(10));
+    gpiod_line_set_value(trig_line_, 0);
+}
+
+float UltrasonicSensor::measure_pulse() {
+    struct gpiod_line_event event;
+    constexpr int timeout_us = 38000; 
+    struct timespec ts = {
+        .tv_sec = timeout_us / 1000000,
+        .tv_nsec = (timeout_us % 1000000) * 1000
+    };
 
     err = gpiod_line_request_output(trig_line, "trig", 0);
     if (err < 0) {
