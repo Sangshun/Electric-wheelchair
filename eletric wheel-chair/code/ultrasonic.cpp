@@ -69,38 +69,39 @@ float UltrasonicSensor::measure_pulse() {
         .tv_nsec = (timeout_us % 1000000) * 1000
     };
 
-    err = gpiod_line_request_output(trig_line, "trig", 0);
-    if (err < 0) {
-        perror("Failed to configure Trig");
-        gpiod_chip_close(chip);
-        return EXIT_FAILURE;
-    }
-
-    err = gpiod_line_request_input(echo_line, "echo");
-    if (err < 0) {
-        perror("Failed to configure Echo");
-        gpiod_chip_close(chip);
-        return EXIT_FAILURE;
-    }
-
-    while (keep_running) {  // Changed to controlled loop
-        gpiod_line_set_value(trig_line, 1);
-        usleep(10);
-        gpiod_line_set_value(trig_line, 0);
-
-        long start_time, end_time;
-        int timeout = 0;
-
-        long timeout_start = getMicrotime();
-        while (gpiod_line_get_value(echo_line) == 0) {
-            if (getMicrotime() - timeout_start > TIMEOUT_US) {
-                timeout = 1;
-                break;
-            }
-            if (!keep_running) break;  // Allow early exit
+     auto wait_event = [&](int type) -> bool {
+        int ret = gpiod_line_event_wait(echo_line_, &ts);
+        if (ret <= 0) {
+            std::cerr << "Event wait failed (ret=" << ret << ")\n";
+            return false;
         }
-        if (timeout || !keep_running) continue;
-        start_time = getMicrotime();
+        ret = gpiod_line_event_read(echo_line_, &event);
+        if (ret != 0) {
+            std::cerr << "Event read failed (ret=" << ret << ")\n";
+            return false;
+        }
+        return event.event_type == type;
+    };
+    
+	if (!wait_event(GPIOD_LINE_EVENT_RISING_EDGE)) {
+    std::cerr << "[Debug] Rising edge not detected, resetting GPIO\n";
+    reset_gpio();
+    return -1;
+	}
+
+    auto start = std::chrono::steady_clock::now();
+
+    if (!wait_event(GPIOD_LINE_EVENT_FALLING_EDGE)) {
+        std::cerr << "[Debug] Falling edge not detected\n";
+        return -1;
+    }
+    auto end = std::chrono::steady_clock::now();
+
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    float distance = (duration.count() * 0.0343) / 2;
+    std::cerr << "[Debug] Duration: " << duration.count() << "us, Distance: " << distance << "cm\n";
+    return distance;
+}
 
         timeout_start = getMicrotime();
         while (gpiod_line_get_value(echo_line) == 1) {
