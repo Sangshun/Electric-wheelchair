@@ -2,33 +2,34 @@
 #define ECG_PROCESSOR_HPP
 
 #include <vector>
-#include <chrono>
-#include <atomic>
-#include <mutex>
-#include <condition_variable>
 #include <deque>
+#include <chrono>
+#include <mutex>
+#include <atomic>
+#include <thread>
+#include <condition_variable>
+#include <stdexcept>
+#include <string>
+#include <termios.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <termios.h>
-#include <thread>
+#include <cstring>
 #include <algorithm>
-#include <numeric>
-#include <stdexcept>
-#include <iomanip>
 
-#define SAMPLE_RATE 250
-#define BUFFER_SIZE 1024
-#define WINDOW_SECONDS 3
+constexpr double BASELINE_ALPHA = 0.99;      
+constexpr int SAMPLE_RATE = 1000;            
+constexpr int WINDOW_SECONDS = 5;           
+constexpr int BUFFER_SIZE = 256;   
 
 class EnhancedFilter {
 public:
     EnhancedFilter(const std::vector<double>& b, const std::vector<double>& a);
     std::vector<double> process(const std::vector<double>& input);
-
 private:
-    const std::vector<double> b_coeff, a_coeff;
-    std::vector<double> x, y;
-    const double baseline_alpha = 0.99;
+    std::vector<double> b_coeff;
+    std::vector<double> a_coeff;
+    std::vector<double> x;
+    std::vector<double> y;
 };
 
 class AdvancedHRCalculator {
@@ -37,15 +38,14 @@ public:
     void update_r_peak();
     double get_heart_rate() const;
     void reset_state();
-
 private:
     mutable std::mutex data_mutex;
-    std::deque<double> hr_buffer;
     std::chrono::system_clock::time_point last_peak_time;
+    std::deque<double> hr_buffer;
     double last_valid_hr;
-    std::chrono::milliseconds qrs_window;
-    std::chrono::milliseconds min_interval;
-    std::atomic<int> noise_count;
+    int noise_count;
+    const int qrs_window;    // Window size for QRS detection (in ms)
+    const int min_interval;  // Minimum interval between peaks (in ms)
 };
 
 class StableECGProcessor {
