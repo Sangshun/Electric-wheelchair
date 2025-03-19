@@ -56,20 +56,26 @@ public:
     void stop();
     void add_samples(const std::vector<double>& samples);
     double current_hr() const;
-
 private:
     void processing_loop();
     std::vector<double> fetch_data();
     void update_thresholds(const std::vector<double>& window);
     void detect_r_peaks(const std::vector<double>& data);
-
+    
     EnhancedFilter filter;
     AdvancedHRCalculator calculator;
-    std::vector<double> circular_buffer;
-    mutable std::mutex buffer_mutex;
-    std::condition_variable data_ready;
     std::atomic<bool> active;
     std::thread processor;
+    std::mutex buffer_mutex;
+    std::condition_variable data_ready;
+    std::vector<double> circular_buffer;
+    
+    // Members for adaptive thresholding
+    double noise_peak;
+    double signal_peak;
+    // To prevent duplicate detection of the same R peak (refractory mechanism)
+    size_t last_peak_index;
+    
     double threshold_low;
     double threshold_high;
 };
@@ -80,16 +86,12 @@ public:
     ~ReliableSerialReader();
     void start();
     void stop();
-
 private:
     void reading_loop();
-
     StableECGProcessor& processor;
     std::atomic<bool> active;
-    std::thread reader;
     int fd;
-    int byte_pos;
-    int16_t current_sample;
+    std::thread reader;
 };
 
-#endif
+#endif 
