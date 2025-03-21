@@ -279,38 +279,87 @@ void ReliableSerialReader::stop() {
     }
 }
 
-///
+
 void ReliableSerialReader::reading_loop() {
-    uint8_t buffer[BUFFER_SIZE];
-    std::vector<int16_t> sample_cache;
+    char read_buffer[BUFFER_SIZE];
+    std::string line_buffer;
 
     while (active.load()) {
-        ssize_t n = ::read(fd, buffer, BUFFER_SIZE);
+        ssize_t n = ::read(fd, read_buffer, BUFFER_SIZE);
+        
         if (n < 0) {
             if (errno == EAGAIN) continue;
             std::cerr << "Read error: " << strerror(errno) << std::endl;
             break;
         }
+        if (n == 0) continue;
 
-        for (int i = 0; i < n; ++i) {
-            if (byte_pos == 0) {
-                current_sample = buffer[i];
-                byte_pos = 1;
-            } else {
-                current_sample |= buffer[i] << 8;
-                sample_cache.push_back(current_sample);
-                byte_pos = 0;
-            }
+        
+        std::cerr << "Read " << n << " bytes: ";
+        for (ssize_t i = 0; i < n; i++) {
+            std::cerr << std::hex << (int)read_buffer[i] << " ";
         }
+        std::cerr << std::endl;
 
-        if (!sample_cache.empty()) {
-            std::vector<double> samples;
-            samples.reserve(sample_cache.size());
-            for (auto s : sample_cache) {
-                samples.push_back(s * 0.0025);
+        
+        line_buffer.append(read_buffer, n);
+
+        size_t pos;
+        while ((pos = line_buffer.find('\n')) != std::string::npos) {
+            std::string line = line_buffer.substr(0, pos);
+            line_buffer.erase(0, pos + 1);
+
+           
+            if (!line.empty() && line.back() == '\r') 
+                line.pop_back();
+            line.erase(0, line.find_first_not_of(" \t\r\n"));  
+
+            
+            if (line.empty()) continue;
+
+            
+            std::cerr << "Extracted Line: [" << line << "]" << std::endl;
+
+            
+            std::istringstream iss(line);
+            std::string token;
+            std::vector<std::string> tokens;
+
+            while (std::getline(iss, token, ',')) {
+                if (!token.empty()) {  
+                    tokens.push_back(token);
+                }
             }
-            processor.add_samples(samples);
-            sample_cache.clear();
+
+            
+            std::cerr << "Extracted Tokens: ";
+            for (const auto &tok : tokens) {
+                std::cerr << "[" << tok << "] ";
+            }
+            std::cerr << std::endl;
+
+            
+            if (tokens.size() >= 3) {
+                std::string ecgToken = tokens[2];  
+
+               
+                std::cerr << "Extracted ECG Token: [" << ecgToken << "]" << std::endl;
+
+                try {
+                    double value = std::stod(ecgToken);
+                    value *= 0.7;  
+
+                    
+                    std::cerr << "Converted ECG Value: " << value << std::endl;
+
+                    processor.add_samples({value});
+                } catch (const std::exception& e) {
+                    std::cerr << "? Failed to convert token: [" << ecgToken 
+                              << "] - " << e.what() << std::endl;
+                }
+            } else {
+                std::cerr << "?? Skipping line (not enough valid tokens)" << std::endl;
+            }
         }
     }
 }
