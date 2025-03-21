@@ -106,14 +106,17 @@ void AdvancedHRCalculator::reset_state() {
     noise_count = 0;
 }
 
-///
-// StableECGProcessor Implementation
+
 StableECGProcessor::StableECGProcessor()
     : filter({{0.0034, 0.0, -0.0068, 0.0, 0.0034},
-             {1.0, -3.6789, 5.1797, -3.3058, 0.8060}}),
+              {1.0, -3.6789, 5.1797, -3.3058, 0.8060}}),
       active(false),
       threshold_low(0.0),
-      threshold_high(0.0) {}
+      threshold_high(0.0),
+      noise_peak(0.0),
+      signal_peak(0.0),
+      last_peak_index(0)
+{}
 
 StableECGProcessor::~StableECGProcessor() {
     stop();
@@ -127,9 +130,8 @@ void StableECGProcessor::start() {
 void StableECGProcessor::stop() {
     active.store(false);
     data_ready.notify_all();
-    if (processor.joinable()) {
+    if (processor.joinable())
         processor.join();
-    }
 }
 
 void StableECGProcessor::add_samples(const std::vector<double>& samples) {
@@ -144,17 +146,38 @@ double StableECGProcessor::current_hr() const {
 
 void StableECGProcessor::processing_loop() {
     std::vector<double> window;
+    int print_counter = 0;
+
     while (active.load()) {
         auto data = fetch_data();
         if (data.empty()) continue;
 
-        auto filtered = filter.process(data);
         
-        // Update analysis window
+        if (print_counter % 20 == 0) {
+            std::cerr << "Raw data: ";
+            for (size_t i = 0; i < data.size() && i < 5; ++i) {
+                std::cerr << data[i] << " ";
+            }
+            std::cerr << std::endl;
+        }
+
+        auto filtered = filter.process(data);
+
+       
+       if (print_counter % 20 == 0) {
+            std::cerr << "Filtered ECG Data: ";
+            for (size_t i = 0; i < filtered.size() && i < 5; ++i) {
+                std::cerr << filtered[i] << " ";
+            }
+            std::cerr << std::endl;
+        }
+
+
+        ++print_counter;
+
         window.insert(window.end(), filtered.begin(), filtered.end());
         if (window.size() > SAMPLE_RATE * WINDOW_SECONDS) {
-            window.erase(window.begin(),
-                       window.begin() + (window.size() - SAMPLE_RATE * WINDOW_SECONDS));
+            window.erase(window.begin(), window.begin() + (window.size() - SAMPLE_RATE * WINDOW_SECONDS));
         }
 
         update_thresholds(window);
@@ -162,10 +185,10 @@ void StableECGProcessor::processing_loop() {
     }
 }
 
+
 std::vector<double> StableECGProcessor::fetch_data() {
     std::unique_lock<std::mutex> lock(buffer_mutex);
-    data_ready.wait(lock, [this](){ return !circular_buffer.empty() || !active.load(); });
-
+    data_ready.wait(lock, [this]() { return !circular_buffer.empty() || !active.load(); });
     std::vector<double> data;
     if (!circular_buffer.empty()) {
         data.swap(circular_buffer);
@@ -174,42 +197,47 @@ std::vector<double> StableECGProcessor::fetch_data() {
 }
 
 void StableECGProcessor::update_thresholds(const std::vector<double>& window) {
-    static double noise_peak = 0.0;
-    static double signal_peak = 0.0;
+    double current_max = *std::max_element(window.begin(), window.end());
     
-    const double current_max = *std::max_element(window.begin(), window.end());
-    
-    noise_peak = 0.875 * noise_peak + 0.125 * current_max;
-    signal_peak = 0.125 * signal_peak + 0.875 * current_max;
-    
-    threshold_low = noise_peak + 0.25 * (signal_peak - noise_peak);
-    threshold_high = 0.5 * threshold_low + 0.5 * signal_peak;
+    noise_peak = 0.95 * noise_peak + 0.05 * current_max;
+    signal_peak = 0.3 * signal_peak + 0.7 * current_max;
+
+    threshold_low = noise_peak + 0.35 * (signal_peak - noise_peak);
+    threshold_high = 0.6 * signal_peak; 
+  
+    std::cerr << "Thresholds - Low: " << threshold_low
+              << " | High: " << threshold_high
+              << " | Noise Peak: " << noise_peak
+              << " | Signal Peak: " << signal_peak
+              << std::endl;
 }
 
 void StableECGProcessor::detect_r_peaks(const std::vector<double>& data) {
-    bool above_threshold = false;
-    
+    static size_t last_peak_index = 0;
+    const size_t min_distance = 30;  
+
     for (size_t i = 1; i < data.size() - 1; ++i) {
-        const double slope = data[i] - data[i-1];
-        
-        if (data[i] > threshold_high && 
-            slope > 0.5 * threshold_high &&
-            data[i] > data[i-1] &&
-            data[i] > data[i+1]) 
-        {
-            if (!above_threshold) {
-                calculator.update_r_peak();
-                above_threshold = true;
-            }
-        } else if (data[i] < threshold_low) {
-            above_threshold = false;
+        double slope = data[i] - data[i - 1];
+
+        if (i > last_peak_index + min_distance &&  
+            data[i] > threshold_high &&  
+            slope > 0.3 * threshold_high) 
+        {      
+            std::cerr << "?? R-Peak Detected! Index: " << i
+                      << " | Value: " << data[i] << std::endl;
+            
+            calculator.update_r_peak();
+            last_peak_index = i;  
         }
     }
 }
 
+
 ReliableSerialReader::ReliableSerialReader(const std::string& port, StableECGProcessor& proc)
-    : processor(proc), active(false), byte_pos(0), current_sample(0) {
-    if ((fd = ::open(port.c_str(), O_RDWR | O_NOCTTY)) < 0) {
+    : processor(proc), active(false)
+{
+    fd = ::open(port.c_str(), O_RDWR | O_NOCTTY);
+    if (fd < 0) {
         throw std::runtime_error("Failed to open serial port: " + std::string(strerror(errno)));
     }
 
@@ -243,15 +271,15 @@ void ReliableSerialReader::start() {
 
 void ReliableSerialReader::stop() {
     active.store(false);
-    if (reader.joinable()) {
+    if (reader.joinable())
         reader.join();
-    }
     if (fd != -1) {
         ::close(fd);
         fd = -1;
     }
 }
 
+///
 void ReliableSerialReader::reading_loop() {
     uint8_t buffer[BUFFER_SIZE];
     std::vector<int16_t> sample_cache;
