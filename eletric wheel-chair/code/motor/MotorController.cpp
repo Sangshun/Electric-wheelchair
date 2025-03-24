@@ -1,23 +1,26 @@
 #include "MotorController.hpp"
+#include <gpiod.hpp>
+#include <iostream>
+#include <mutex>
 
+// Define the GPIO chip name
 constexpr char GPIO_CHIP[] = "gpiochip0";
-constexpr unsigned IN1_PIN = 17;
-constexpr unsigned IN2_PIN = 27;
 
-MotorController::MotorController() 
+// Parameterized constructor: allows setting the two output pins
+MotorController::MotorController(unsigned in1_pin, unsigned in2_pin)
     : m_current_state(MotorState::STOP), m_emergency_flag(false)
 {
     try {
         m_chip = gpiod::chip(GPIO_CHIP);
-        m_in1 = m_chip.get_line(IN1_PIN);
-        m_in2 = m_chip.get_line(IN2_PIN);
-        
+        m_in1 = m_chip.get_line(in1_pin);
+        m_in2 = m_chip.get_line(in2_pin);
+
         gpiod::line_request config = {
             "motor_ctrl",
             gpiod::line_request::DIRECTION_OUTPUT,
             0
         };
-        
+
         m_in1.request(config, 0);
         m_in2.request(config, 0);
     } catch (const std::exception& e) {
@@ -25,6 +28,9 @@ MotorController::MotorController()
         throw;
     }
 }
+
+// Default constructor uses pins 17 and 27
+MotorController::MotorController() : MotorController(17, 27) {}
 
 void MotorController::set_state(MotorState new_state) {
     std::lock_guard<std::mutex> lock(m_mutex);
