@@ -16,7 +16,6 @@
 #include <unistd.h>
 #include <cctype>
 
-
 EnhancedFilter::EnhancedFilter(const std::vector<double>& b, const std::vector<double>& a)
     : b_coeff(b), a_coeff(a), x(5, 0.0), y(5, 0.0) {}
 
@@ -30,12 +29,9 @@ std::vector<double> EnhancedFilter::process(const std::vector<double>& input) {
         baseline = 0.995 * baseline + 0.005 * sample;
         sample -= baseline;
 
-       
         x = {sample, x[0], x[1], x[2], x[3]};
-        
         y = {0.0, y[0], y[1], y[2], y[3]};
 
-        
         y[0] = b_coeff[0]*x[0] + b_coeff[1]*x[1] + b_coeff[2]*x[2] +
                b_coeff[3]*x[3] + b_coeff[4]*x[4] -
                a_coeff[1]*y[1] - a_coeff[2]*y[2] -
@@ -50,7 +46,6 @@ std::vector<double> EnhancedFilter::process(const std::vector<double>& input) {
 AdvancedHRCalculator::AdvancedHRCalculator()
     : last_valid_hr(0.0), qrs_window(200), min_interval(300), noise_count(0) {}
 
-
 void AdvancedHRCalculator::update_r_peak() {
     const auto now = std::chrono::system_clock::now();
     std::lock_guard<std::mutex> lock(data_mutex);
@@ -62,23 +57,19 @@ void AdvancedHRCalculator::update_r_peak() {
 
     auto interval = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_peak_time);
 
-    
+    // std::cerr << "? Ignoring unrealistically fast beat (interval: " << interval.count() << " ms)" << std::endl;
     if (interval.count() < 500) {  
-        std::cerr << "? Ignoring unrealistically fast beat (interval: " << interval.count() << " ms)" << std::endl;
         return;
     }
 
     double new_hr = 60000.0 / interval.count();
 
-    
+    // std::cerr << "? Calculated BPM: " << new_hr << std::endl;
     if (last_valid_hr > 0 && std::abs(new_hr - last_valid_hr) > 20) {
-        std::cerr << "?? Sudden HR jump detected (from " << last_valid_hr 
-                  << " to " << new_hr << "), ignoring." << std::endl;
+        // std::cerr << "?? Sudden HR jump detected (from " << last_valid_hr 
+        //           << " to " << new_hr << "), ignoring." << std::endl;
         return;
     }
-
-  
-    std::cerr << "? Calculated BPM: " << new_hr << std::endl;
 
     if (new_hr >= 30.0 && new_hr <= 220.0) {
         hr_buffer.push_back(new_hr);
@@ -88,7 +79,7 @@ void AdvancedHRCalculator::update_r_peak() {
 
         auto temp = hr_buffer;
         std::sort(temp.begin(), temp.end());
-        last_valid_hr = temp[temp.size() / 2];  
+        last_valid_hr = temp[temp.size() / 2];
     }
 
     last_peak_time = now;
@@ -105,7 +96,6 @@ void AdvancedHRCalculator::reset_state() {
     last_peak_time = std::chrono::system_clock::time_point{};
     noise_count = 0;
 }
-
 
 StableECGProcessor::StableECGProcessor()
     : filter({{0.0034, 0.0, -0.0068, 0.0, 0.0034},
@@ -152,26 +142,23 @@ void StableECGProcessor::processing_loop() {
         auto data = fetch_data();
         if (data.empty()) continue;
 
-        
-        if (print_counter % 20 == 0) {
-            std::cerr << "Raw data: ";
-            for (size_t i = 0; i < data.size() && i < 5; ++i) {
-                std::cerr << data[i] << " ";
-            }
-            std::cerr << std::endl;
-        }
+        // if (print_counter % 20 == 0) {
+        //     std::cerr << "Raw data: ";
+        //     for (size_t i = 0; i < data.size() && i < 5; ++i) {
+        //         std::cerr << data[i] << " ";
+        //     }
+        //     std::cerr << std::endl;
+        // }
 
         auto filtered = filter.process(data);
 
-       
-       if (print_counter % 20 == 0) {
-            std::cerr << "Filtered ECG Data: ";
-            for (size_t i = 0; i < filtered.size() && i < 5; ++i) {
-                std::cerr << filtered[i] << " ";
-            }
-            std::cerr << std::endl;
-        }
-
+        // if (print_counter % 20 == 0) {
+        //     std::cerr << "Filtered ECG Data: ";
+        //     for (size_t i = 0; i < filtered.size() && i < 5; ++i) {
+        //         std::cerr << filtered[i] << " ";
+        //     }
+        //     std::cerr << std::endl;
+        // }
 
         ++print_counter;
 
@@ -185,7 +172,6 @@ void StableECGProcessor::processing_loop() {
     }
 }
 
-
 std::vector<double> StableECGProcessor::fetch_data() {
     std::unique_lock<std::mutex> lock(buffer_mutex);
     data_ready.wait(lock, [this]() { return !circular_buffer.empty() || !active.load(); });
@@ -198,18 +184,18 @@ std::vector<double> StableECGProcessor::fetch_data() {
 
 void StableECGProcessor::update_thresholds(const std::vector<double>& window) {
     double current_max = *std::max_element(window.begin(), window.end());
-    
+
     noise_peak = 0.95 * noise_peak + 0.05 * current_max;
     signal_peak = 0.3 * signal_peak + 0.7 * current_max;
 
     threshold_low = noise_peak + 0.35 * (signal_peak - noise_peak);
     threshold_high = 0.6 * signal_peak; 
-  
-    std::cerr << "Thresholds - Low: " << threshold_low
-              << " | High: " << threshold_high
-              << " | Noise Peak: " << noise_peak
-              << " | Signal Peak: " << signal_peak
-              << std::endl;
+
+    // std::cerr << "Thresholds - Low: " << threshold_low
+    //           << " | High: " << threshold_high
+    //           << " | Noise Peak: " << noise_peak
+    //           << " | Signal Peak: " << signal_peak
+    //           << std::endl;
 }
 
 void StableECGProcessor::detect_r_peaks(const std::vector<double>& data) {
@@ -219,20 +205,17 @@ void StableECGProcessor::detect_r_peaks(const std::vector<double>& data) {
     for (size_t i = 1; i < data.size() - 1; ++i) {
         double slope = data[i] - data[i - 1];
 
-        if (i > last_peak_index + min_distance &&  
-            data[i] > threshold_high &&  
-            slope > 0.3 * threshold_high) 
-        {      
-            std::cerr << "?? R-Peak Detected! Index: " << i
-                      << " | Value: " << data[i] << std::endl;
-            
+        if (i > last_peak_index + min_distance &&
+            data[i] > threshold_high &&
+            slope > 0.3 * threshold_high)
+        {
+            // std::cerr << "?? R-Peak Detected! Index: " << i
+            //           << " | Value: " << data[i] << std::endl;
             calculator.update_r_peak();
-            last_peak_index = i;  
+            last_peak_index = i;
         }
     }
 }
-
-
 ReliableSerialReader::ReliableSerialReader(const std::string& port, StableECGProcessor& proc)
     : processor(proc), active(false)
 {
@@ -279,29 +262,22 @@ void ReliableSerialReader::stop() {
     }
 }
 
-
 void ReliableSerialReader::reading_loop() {
     char read_buffer[BUFFER_SIZE];
     std::string line_buffer;
+    auto last_print_time = std::chrono::steady_clock::now();  
 
     while (active.load()) {
         ssize_t n = ::read(fd, read_buffer, BUFFER_SIZE);
         
         if (n < 0) {
             if (errno == EAGAIN) continue;
-            std::cerr << "Read error: " << strerror(errno) << std::endl;
+            
+            // std::cerr << "Read error: " << strerror(errno) << std::endl;
             break;
         }
         if (n == 0) continue;
 
-        
-        std::cerr << "Read " << n << " bytes: ";
-        for (ssize_t i = 0; i < n; i++) {
-            std::cerr << std::hex << (int)read_buffer[i] << " ";
-        }
-        std::cerr << std::endl;
-
-        
         line_buffer.append(read_buffer, n);
 
         size_t pos;
@@ -309,18 +285,12 @@ void ReliableSerialReader::reading_loop() {
             std::string line = line_buffer.substr(0, pos);
             line_buffer.erase(0, pos + 1);
 
-           
             if (!line.empty() && line.back() == '\r') 
                 line.pop_back();
-            line.erase(0, line.find_first_not_of(" \t\r\n"));  
+            line.erase(0, line.find_first_not_of(" \t\r\n"));
 
-            
             if (line.empty()) continue;
 
-            
-            std::cerr << "Extracted Line: [" << line << "]" << std::endl;
-
-            
             std::istringstream iss(line);
             std::string token;
             std::vector<std::string> tokens;
@@ -331,34 +301,25 @@ void ReliableSerialReader::reading_loop() {
                 }
             }
 
-            
-            std::cerr << "Extracted Tokens: ";
-            for (const auto &tok : tokens) {
-                std::cerr << "[" << tok << "] ";
-            }
-            std::cerr << std::endl;
-
-            
             if (tokens.size() >= 3) {
-                std::string ecgToken = tokens[2];  
-
-               
-                std::cerr << "Extracted ECG Token: [" << ecgToken << "]" << std::endl;
+                std::string ecgToken = tokens[2];
 
                 try {
                     double value = std::stod(ecgToken);
-                    value *= 0.7;  
-
+                    value *= 0.7;
+                                        
+                    auto now = std::chrono::steady_clock::now();
+                    if (now - last_print_time >= std::chrono::seconds(2)) {
+                        std::cerr << "Converted ECG Value: " << value << std::endl;
+                        last_print_time = now;
+                    }
                     
-                    std::cerr << "Converted ECG Value: " << value << std::endl;
-
                     processor.add_samples({value});
                 } catch (const std::exception& e) {
-                    std::cerr << "? Failed to convert token: [" << ecgToken 
-                              << "] - " << e.what() << std::endl;
+                    
+                    // std::cerr << "? Failed to convert token: [" << ecgToken 
+                    //           << "] - " << e.what() << std::endl;
                 }
-            } else {
-                std::cerr << "?? Skipping line (not enough valid tokens)" << std::endl;
             }
         }
     }
