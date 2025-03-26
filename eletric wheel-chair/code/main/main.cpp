@@ -387,30 +387,30 @@ int main() {
             }
             
             // LED control logic:
-// If the motor is active, blink LEDs regardless of the light sensor.
-// If the motor is stopped, use the light sensor state: dark => LEDs on; bright => LEDs off.
-MotorState m_state = motor.get_state(); // using motor1 state as indicator for motor activity
-if (m_state != MotorState::STOP) {
-    // Motor is active, blink LEDs.
-    auto ms = duration_cast<milliseconds>(now.time_since_epoch()).count();
-    bool blink_on = (ms % 1000) < 500; // 500ms on, 500ms off cycle.
-    if (blink_on) {
-        led1.turnOn();
-        led2.turnOn();
-    } else {
-        led1.turnOff();
-        led2.turnOff();
-    }
-} else {
-    // Motor is stopped: follow light sensor state.
-    if (g_lightState.load()) { // Dark condition
-        led1.turnOn();
-        led2.turnOn();
-    } else { // Bright condition
-        led1.turnOff();
-        led2.turnOff();
-    }
-}
+            // If the motor is active, blink LEDs regardless of the light sensor.
+            // If the motor is stopped, use the light sensor state: dark => LEDs on; bright => LEDs off.
+            MotorState m_state = motor.get_state(); // using motor1 state as indicator for motor activity
+            if (m_state != MotorState::STOP) {
+                // Motor is active, blink LEDs.
+                auto ms = duration_cast<milliseconds>(now.time_since_epoch()).count();
+                bool blink_on = (ms % 1000) < 500; // 500ms on, 500ms off cycle.
+                if (blink_on) {
+                    led1.turnOn();
+                    led2.turnOn();
+                } else {
+                    led1.turnOff();
+                    led2.turnOff();
+                }
+            } else {
+                // Motor is stopped: follow light sensor state.
+                if (g_lightState.load()) { // Dark condition
+                    led1.turnOn();
+                    led2.turnOn();
+                } else { // Bright condition
+                    led1.turnOff();
+                    led2.turnOff();
+                }
+            }
 
         }
         
