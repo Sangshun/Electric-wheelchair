@@ -6,6 +6,7 @@
 #include "ecg_processor.hpp"
 #include "syn6288_controller.hpp"  // TTS module header
 #include "mjpeg_server.hpp"
+#include "LEDController.hpp"       // LED module header
 #include <iostream>
 #include <iomanip>
 #include <csignal>
@@ -20,7 +21,6 @@
 #include <sys/types.h>
 #include <signal.h>
 
-// Using std::chrono for time-related functions
 using namespace std::chrono;
 
 // Global termination flag
@@ -93,9 +93,11 @@ private:
     std::string buffer;
     std::mutex mtx;
 };
+
 // HTTP server function using Boost.Asio that serves two endpoints:
 // "/" returns an HTML page with JavaScript for auto-refresh
 // "/data" returns JSON sensor data
+
 void run_http_server() {
     try {
         boost::asio::io_context io_context;
@@ -230,7 +232,7 @@ int main() {
                     std::cout << "Cannot set FORWARD: Motor is in BACKWARD state. Stop it first." << std::endl;
                 }
             },
-              // Long press: set motor to BACKWARD with TTS "BACKWARD"
+            // Long press: set motor to BACKWARD with TTS "BACKWARD"
             [&motor, &tts]() {
                 MotorState state = motor.get_state();
                 if (state == MotorState::STOP) {
@@ -272,7 +274,7 @@ int main() {
                     std::cout << "Cannot set RISE: Motor2 is in FALL state. Stop it first." << std::endl;
                 }
             },
-             // Long press: set motor2 to FALL (using BACKWARD state) with TTS "FALL"
+              // Long press: set motor2 to FALL (using BACKWARD state) with TTS "FALL"
             [&motor2, &tts]() {
                 MotorState state = motor2.get_state();
                 if (state == MotorState::STOP) {
@@ -293,6 +295,10 @@ int main() {
             std::cerr << "Failed to start button event polling on GPIO6" << std::endl;
             return 1;
         }
+        
+        // Initialize LED controllers for LEDs on GPIO9 and GPIO11
+        LEDController led1(9);
+        LEDController led2(11);
         
         // Initialize LightSensor on GPIO16
         LightSensor lightSensor(16, [](bool state) {
@@ -324,15 +330,16 @@ int main() {
           std::cout << "All modules started:" << std::endl;
         std::cout << "  - Motor control via button on GPIO5 (FORWARD/BACKWARD)" << std::endl;
         std::cout << "  - Second motor control via button on GPIO6 (RISE/FALL)" << std::endl;
+        std::cout << "  - LED module on GPIO9 and GPIO11" << std::endl;
         std::cout << "  - Light sensor on GPIO16" << std::endl;
         std::cout << "  - Ultrasonic sensor on GPIO23/24" << std::endl;
         std::cout << "  - PIR sensor on GPIO25" << std::endl;
         std::cout << "  - ECG processor reading from /dev/ttyUSB0" << std::endl;
         std::cout << "  - TTS (SYN6288) on /dev/serial0 at 9600bps" << std::endl;
-        std::cout << "Camera server started on port 8080" << std::endl;
+        std::cout << "  - Camera server started on port 8080" << std::endl;
         std::cout << "Press Ctrl+C to exit." << std::endl;
         
-        // Timing variables for sensor data display
+        // Timing variables for sensor data display and LED control
         auto last_light_print = steady_clock::now();
         bool last_light = g_lightState.load(std::memory_order_acquire);
         auto last_ultrasonic = steady_clock::now();
@@ -344,7 +351,7 @@ int main() {
             std::this_thread::sleep_for(milliseconds(100));
             auto now = steady_clock::now();
             
-            // Light sensor: update every 10 seconds or when state changes
+            // Light sensor: update every 10 seconds or on state change
             bool current_light = g_lightState.load(std::memory_order_acquire);
             if (current_light != last_light || duration_cast<seconds>(now - last_light_print).count() >= 10) {
                 std::cout << "Light sensor state: " << (current_light ? "Dark" : "Light") << std::endl;
@@ -363,7 +370,7 @@ int main() {
                 last_ultrasonic = now;
             }
             
-            // PIR sensor: update when state changes or every second
+            // PIR sensor: update on state change or once per second
             bool current_pir = g_motionDetected.load(std::memory_order_acquire);
             if (current_pir != last_pir || duration_cast<seconds>(now - last_pir_print).count() >= 1) {
                 std::cout << "PIR sensor state: " << (current_pir ? "Motion detected" : "No motion") << std::endl;
@@ -371,14 +378,43 @@ int main() {
                 last_pir = current_pir;
             }
             
-            // ECG sensor: update every 3 seconds
+               // ECG sensor: update every 3 seconds
             if (duration_cast<seconds>(now - last_ecg_disp).count() >= 3) {
                 double ecg_val = g_latest_ecg_value.load();
                 std::cout << "Latest Converted ECG Value: " << std::fixed << std::setprecision(1)
                           << ecg_val << " (converted value)" << std::endl;
                 last_ecg_disp = now;
             }
+            
+            // LED control logic:
+// If the motor is active, blink LEDs regardless of the light sensor.
+// If the motor is stopped, use the light sensor state: dark => LEDs on; bright => LEDs off.
+MotorState m_state = motor.get_state(); // using motor1 state as indicator for motor activity
+if (m_state != MotorState::STOP) {
+    // Motor is active, blink LEDs.
+    auto ms = duration_cast<milliseconds>(now.time_since_epoch()).count();
+    bool blink_on = (ms % 1000) < 500; // 500ms on, 500ms off cycle.
+    if (blink_on) {
+        led1.turnOn();
+        led2.turnOn();
+    } else {
+        led1.turnOff();
+        led2.turnOff();
+    }
+} else {
+    // Motor is stopped: follow light sensor state.
+    if (g_lightState.load()) { // Dark condition
+        led1.turnOn();
+        led2.turnOn();
+    } else { // Bright condition
+        led1.turnOff();
+        led2.turnOff();
+    }
+}
+
         }
+        
+        
         
         std::cout << std::endl;
         button5.stop();
