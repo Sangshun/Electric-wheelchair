@@ -56,15 +56,16 @@ This project delivers a "smart" wheelchair controller: ambient light, distance, 
 
 ### - **2.Sensors**
 
-#### - **2.1Light sensor** (GPIO 16)                                  
+#### - **2.1 Light sensor** (GPIO 16)                                  
   <img src="https://github.com/user-attachments/assets/fc7dd699-1beb-4e1b-839c-e6ea1c9aa654" width="50%" />
   
-#### - **2.2Ultrasonic module** (Trig GPIO 23, Echo GPIO 24)
+#### - **2.2 Ultrasonic module** (Trig GPIO 23, Echo GPIO 24)
 
-#### - **2.3PIR motion sensor** (GPIO 25)
+#### - **2.3 PIR motion sensor** (GPIO 25)
 
-#### - **2.4ECG serial module** (/dev/ttyUSB0)
+#### - **2.4 ECG serial module** (/dev/ttyUSB0)
 
+![WPS1](https://github.com/user-attachments/assets/1d27bde6-b7b0-4c01-84a7-9ed85d17a059)
 
 ### 3.Actuators
 
