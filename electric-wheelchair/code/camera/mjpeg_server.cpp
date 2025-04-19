@@ -1,31 +1,38 @@
-#include <libcamera/libcamera.h>
+#include "mjpeg_server.hpp"
 #include <boost/asio.hpp>
 #include <jpeglib.h>
-#include <vector>
-#include <thread>
 #include <sys/mman.h>
-#include <mutex>
-#include <memory>
 #include <iostream>
 #include <fstream>
-#include <condition_variable>
 #include <chrono>
 #include <algorithm>
 #include <cstring>
 #include <cerrno>
-#include <cstdint>
+#include <csignal>
 
+// For brevity
 using namespace boost::asio;
 using namespace boost::asio::ip;
 
 
-libcamera::CameraManager* cameraManager = nullptr;
-std::shared_ptr<libcamera::Camera> camera;
-std::unique_ptr<libcamera::CameraConfiguration> config;
-std::mutex cameraMutex;
-std::vector<std::unique_ptr<libcamera::Request>> requests;
-std::condition_variable requestCV;
-std::unique_ptr<libcamera::FrameBufferAllocator> allocator;
+// Define static members.
+//MJPEGServer* MJPEGServer::instance_ = nullptr;
+std::atomic<bool> MJPEGServer::running_{true};
+
+//------------------------------------------------------------------------------
+// Static signal handler definition.
+//void MJPEGServer::signal_handler(int signal) {
+//    if (signal == SIGINT) {
+//        std::cout << "\nSIGINT received, stopping MJPEG server..." << std::endl;
+//        if (instance_) {
+//            instance_->stop();
+ //       }
+//        running_.store(false);
+//    }
+//}
+
+//------------------------------------------------------------------------------
+// Image Processing Helper Functions
 
 
 // Static inline function to get pixel values ​​in a Bayer image
@@ -253,7 +260,13 @@ std::vector<unsigned char> encode_jpeg(const libcamera::FrameBuffer* buffer) {
     free(jpegData);
     return jpegBuffer;
 }
+//------------------------------------------------------------------------------
+// Asynchronous Accept Helper
 
+
+
+//------------------------------------------------------------------------------
+// Server Methods
 
 void handle_client(tcp::socket socket) {
     try {
@@ -350,106 +363,133 @@ void handle_client(tcp::socket socket) {
     }
 }
 
-int main() {
-    // Creating a Camera Manager
-    cameraManager = new libcamera::CameraManager();
-    // Launch Camera Manager
-    if (cameraManager->start() != 0) {
+bool MJPEGServer::init_camera() {
+    cameraManager_ = new libcamera::CameraManager();
+    if (cameraManager_->start() != 0) {
         std::cerr << "Camera manager initialization failed" << std::endl;
-        return 1;
+        return false;
     }
-    // Check if a camera is detected
-    if (cameraManager->cameras().empty()) {
+    if (cameraManager_->cameras().empty()) {
         std::cerr << "No cameras detected" << std::endl;
-        cameraManager->stop();
-        delete cameraManager;
-        return 1;
+        cameraManager_->stop();
+        delete cameraManager_;
+        cameraManager_ = nullptr;
+        return false;
     }
     {
-        // Lock
-        std::unique_lock<std::mutex> lock(cameraMutex);
-        // Get the first camera
-        camera = cameraManager->cameras()[0];
-        std::cout << "Initializing camera: " << camera->id() << std::endl;
-        // Get the Camera
-        if (camera->acquire() != 0) {
+        std::unique_lock<std::mutex> lock(cameraMutex_);
+        camera_ = cameraManager_->cameras()[0];
+        std::cout << "Initializing camera: " << camera_->id() << std::endl;
+        if (camera_->acquire() != 0) {
             std::cerr << "Camera acquisition failed" << std::endl;
-            return 1;
+            return false;
         }
-        // Generate configuration
-        config = camera->generateConfiguration({libcamera::StreamRole::Viewfinder});
-        if (!config) {
+        config_ = camera_->generateConfiguration({libcamera::StreamRole::Viewfinder});
+        if (!config_) {
             std::cerr << "Configuration generation failed" << std::endl;
-            return 1;
+            return false;
         }
-auto& streamConfig = config->at(0);
-      
-        // Set the pixel format
+        auto& streamConfig = config_->at(0);
         streamConfig.pixelFormat = libcamera::formats::SGBRG10;
-        // Set the resolution
         streamConfig.size = libcamera::Size(640, 480);
-        // Verify the configuration
-        if (config->validate() == libcamera::CameraConfiguration::Invalid) {
+        if (config_->validate() == libcamera::CameraConfiguration::Invalid) {
             std::cerr << "Invalid camera configuration" << std::endl;
-            return 1;
+            return false;
         }
-        // Configuring the Camera
-        if (camera->configure(config.get()) < 0) {
+        if (camera_->configure(config_.get()) < 0) {
             std::cerr << "Camera configuration failed" << std::endl;
-            return 1;
+            return false;
         }
-        // Allocating Buffers
-        allocator = std::make_unique<libcamera::FrameBufferAllocator>(camera);
-        if (allocator->allocate(config->at(0).stream()) < 0) {
+        allocator_ = std::make_unique<libcamera::FrameBufferAllocator>(camera_);
+        if (allocator_->allocate(config_->at(0).stream()) < 0) {
             std::cerr << "Buffer allocation failed" << std::endl;
-            return 1;
+            return false;
         }
-        // Setting control parameters
         libcamera::ControlList controls;
         controls.set(libcamera::controls::FrameDurationLimits,
                      libcamera::Span<const int64_t, 2>({33333, 33333}));
-        // Create a request
-        for (auto& buffer : allocator->buffers(config->at(0).stream())) {
-            auto request = camera->createRequest();
+        for (auto& buffer : allocator_->buffers(config_->at(0).stream())) {
+            auto request = camera_->createRequest();
             if (!request)
                 continue;
-            if (request->addBuffer(config->at(0).stream(), buffer.get()) == 0) {
-                requests.push_back(std::move(request));
+            if (request->addBuffer(config_->at(0).stream(), buffer.get()) == 0) {
+                requests_.push_back(std::move(request));
             }
         }
-        // Activate the camera
-        if (camera->start() || requests.empty()) {
+        if (camera_->start() || requests_.empty()) {
             std::cerr << "Camera startup failed" << std::endl;
-            return 1;
+            return false;
         }
-        // Queuing Requests
-        for (auto& request : requests) {
-            camera->queueRequest(request.get());
+         for (auto& request : requests_) {
+            camera_->queueRequest(request.get());
         }
-        // Connection request completion signal
-        camera->requestCompleted.connect(camera.get(), [](libcamera::Request* request) {
-            requestCV.notify_all();
+        camera_->requestCompleted.connect(camera_.get(), [this](libcamera::Request* request) {
+            requestCV_.notify_all();
         });
     }
-    // Creating an IO Context
-    io_context io;
-    // Creating a TCP Listener
-    tcp::acceptor acceptor(io, tcp::endpoint(tcp::v4(), 8080));
-    std::cout << "Server running on port 8080" << std::endl;
-    // Loop to accept client connections
-    while (true) {
-        tcp::socket socket(io);
-        acceptor.accept(socket);
-        // Create a thread to handle client connections
-        std::thread(handle_client, std::move(socket)).detach();
+    return true;
+}
+
+MJPEGServer::MJPEGServer(unsigned short port)
+    : cameraManager_(nullptr), port_(port) {
+    // Set the global instance pointer for signal handling.
+    //instance_ = this;
+    //std::signal(SIGINT, MJPEGServer::signal_handler);
+}
+
+MJPEGServer::~MJPEGServer() {
+    stop();
+    if (camera_) {
+        camera_->stop();
+        camera_->release();
     }
-    // Stop Camera
-    camera->stop();
-    // Release the camera
-    camera->release();
-    // Stop the camera manager
-    cameraManager->stop();
-    // Remove Camera Manager
-    delete cameraManager;
-    return 0;
+    if (cameraManager_) {
+        cameraManager_->stop();
+        delete cameraManager_;
+    }
+}
+
+bool MJPEGServer::start() {
+    if (!init_camera())
+        return false;
+    running_.store(true);
+    // Start the server thread which will run the asynchronous accept loop.
+    serverThread_ = std::thread(&MJPEGServer::run_server, this);
+    return true;
+}
+
+void MJPEGServer::run_server() {
+    try {
+        acceptor_ = std::make_unique<tcp::acceptor>(io_, tcp::endpoint(tcp::v4(), port_));
+        std::cout << "MJPEG server running on port " << port_ << std::endl;
+        // Start asynchronous accept loop.
+        start_accept();
+        // Run the io_context. This will return when io_.stop() is called.
+        io_.run();
+    } catch (const std::exception& e) {
+        std::cerr << "Server exception: " << e.what() << std::endl;
+    }
+}
+
+void MJPEGServer::start_accept() {
+    auto socket = std::make_shared<tcp::socket>(io_);
+    acceptor_->async_accept(*socket, [this, socket](const boost::system::error_code &ec) {
+        if (!ec && running_.load()) {
+            std::thread(&MJPEGServer::handle_client, this, std::move(*socket)).detach();
+        }
+        if (running_.load()) {
+            start_accept(); // Continue accepting new connections.
+        }
+    });
+}
+
+void MJPEGServer::stop() {
+    running_.store(false);
+    if (acceptor_) {
+        boost::system::error_code ec;
+        acceptor_->close(ec);
+    }
+    io_.stop();
+    if (serverThread_.joinable())
+        serverThread_.join();
 }
