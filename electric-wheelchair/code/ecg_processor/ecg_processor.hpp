@@ -16,13 +16,13 @@
 #include <cstring>
 #include <algorithm>
 
-
+// Constants for ECG processing
 constexpr double BASELINE_ALPHA = 0.99;      
 constexpr int SAMPLE_RATE = 1000;            
 constexpr int WINDOW_SECONDS = 5;           
 constexpr int BUFFER_SIZE = 256;           
 
-
+// Class for filtering ECG signals using given filter coefficients
 class EnhancedFilter {
 public:
     EnhancedFilter(const std::vector<double>& b, const std::vector<double>& a);
@@ -34,7 +34,7 @@ private:
     std::vector<double> y;
 };
 
-
+// Class for calculating heart rate based on detected R-peaks
 class AdvancedHRCalculator {
 public:
     AdvancedHRCalculator();
@@ -51,7 +51,7 @@ private:
     const int min_interval;  // Minimum interval between peaks (in ms)
 };
 
-
+// Class for processing ECG data in real-time
 class StableECGProcessor {
 public:
     StableECGProcessor();
@@ -66,8 +66,8 @@ private:
     void update_thresholds(const std::vector<double>& window);
     void detect_r_peaks(const std::vector<double>& data);
     
-    EnhancedFilter filter;
-    AdvancedHRCalculator calculator;
+    EnhancedFilter filter;  // Filter for preprocessing ECG signals
+    AdvancedHRCalculator calculator;  // Heart rate calculation module
     std::atomic<bool> active;
     std::thread processor;
     std::mutex buffer_mutex;
@@ -84,7 +84,7 @@ private:
     double threshold_high;
 };
 
-
+// Class for reading ECG data from a serial port
 class ReliableSerialReader {
 public:
     ReliableSerialReader(const std::string& port, StableECGProcessor& proc);
@@ -92,7 +92,7 @@ public:
     void start();
     void stop();
 private:
-    void reading_loop();
+    void reading_loop();  // Reads data continuously from the serial port
     StableECGProcessor& processor;
     std::atomic<bool> active;
     int fd;
