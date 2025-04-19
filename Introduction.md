@@ -72,7 +72,7 @@ This project delivers a "smart" wheelchair controller: ambient light, distance, 
 ### 3. Streams  
 - **Reverse‑view camera** (MJPEG server on port 8080)
   <p align="center">
-  <img src="https://github.com/user-attachments/assets/0458833e-d222-4392-9483-41c5ab458deb" width="30%" alt="Raspberry Pi" />
+  <img src="https://github.com/user-attachments/assets/0458833e-d222-4392-9483-41c5ab458deb" width="10%" alt="Raspberry Pi" />
 </p>
 
 ### 4.Actuators
@@ -87,4 +87,4 @@ This project delivers a "smart" wheelchair controller: ambient light, distance, 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/3c078222-af2d-4d17-ad20-dedf3ce6155b" width="50%" alt="Raspberry Pi" />
 </p>
-
+---
