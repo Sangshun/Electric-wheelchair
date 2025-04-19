@@ -1,19 +1,20 @@
 # Electric Wheel‑Chair: Real‑Time Embedded Sensor & Actuator Dashboard
 
-A complete real‑time embedded system on Raspberry Pi demonstrating multi‑sensor data acquisition, actuator control, voice feedback, LED signaling and two live web interfaces. This document serves as both a user guide and a mini lab report, walking through hardware setup, Raspberry Pi configuration, software build, and system validation.
+A complete, event‑driven C++ application on Raspberry Pi integrating multi‑sensor data acquisition, actuator control, voice feedback, LED signaling and dual live web interfaces. This document combines a user guide with lab‑report–style detail, covering hardware setup, Pi configuration, software build, and system validation.
 
 ---
 
 ## 📄 Abstract
 
-This project integrates light, distance, motion and ECG sensors with dual‑motor control, TTS voice feedback, LED indicators and web dashboards into a single event‑driven C++ application running on a Raspberry Pi. It showcases real‑time responsiveness (<1 s), modular software architecture and an easy‑to‑reproduce hardware/software platform for prototyping assistive devices.
+This project delivers a "smart" wheelchair controller: ambient light, distance, motion and ECG sensors feed live data into a dual‑motor drive system with TTS prompts and LED indicators. Two web services (sensor dashboard on port 8000; reverse camera on port 8080) present real‑time feedback. Modular, callback‑based architecture ensures sub‑second responsiveness.
 
 ---
 
 ## 🔬 Introduction
 
-- **Problem statement:** Traditional wheel‑chairs lack integrated sensing and feedback for low‑visibility or monitoring vital signs.
-- **Solution:** A “smart” wheel‑chair controller that senses ambient light, obstacles, motion, and ECG, then drives motors, LEDs and voice prompts—and streams sensor data and camera video to any browser.
+Problem statement: Wheelchairs rarely provide integrated environmental sensing or vital‑sign monitoring, limiting safety in low light or obstacle‑dense scenarios.
+
+Solution: A unified embedded system on Raspberry Pi that measures light, distance, motion and ECG; drives two motors (forward/backward, rise/fall); issues audio prompts; signals state via LEDs; and streams sensor data and camera video to any networked browser.
 
 ---
 
