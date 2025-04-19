@@ -53,7 +53,7 @@ This project delivers a "smart" wheelchair controller: ambient light, distance, 
 
 ### 1. Raspberry Pi (Model 5 with 40‑pin GPIO header)
   <p align="center">
-  <img src="https://github.com/user-attachments/assets/6e951966-0cd0-40a9-8a7b-cd38768e5660" width="50%" alt="Raspberry Pi" />
+  <img src="https://github.com/user-attachments/assets/6e951966-0cd0-40a9-8a7b-cd38768e5660" width="70%" alt="Raspberry Pi" />
 </p>
 
 ### - **2.Sensors**
@@ -65,8 +65,9 @@ This project delivers a "smart" wheelchair controller: ambient light, distance, 
 #### - **2.3 PIR motion sensor** (GPIO 25)
 
 #### - **2.4 ECG serial module** (/dev/ttyUSB0)
-<img src="https://github.com/user-attachments/assets/1d27bde6-b7b0-4c01-84a7-9ed85d17a059" width="50%" />
-
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/1d27bde6-b7b0-4c01-84a7-9ed85d17a059" width="70%" alt="Raspberry Pi" />
+</p>
 ### 3.Actuators
 
 Motor 1 via H‑bridge (GPIO 17/27) with control button on GPIO 5
