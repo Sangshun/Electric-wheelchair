@@ -53,13 +53,12 @@ This project delivers a "smart" wheelchair controller: ambient light, distance, 
 
 ### 1. Raspberry Pi (Model 5 with 40‑pin GPIO header)
 ![FIG1](https://github.com/user-attachments/assets/6e951966-0cd0-40a9-8a7b-cd38768e5660)
-<img src="https://github.com/user-attachments/assets/6e951966-0cd0-40a9-8a7b-cd38768e5660" width="50%" />
 
 ### - **2.Sensors**
 
-#### - **Light sensor** (GPIO 16)
-  ![FIG2](https://github.com/user-attachments/assets/fc7dd699-1beb-4e1b-839c-e6ea1c9aa654)
-
+#### - **Light sensor** (GPIO 16)                                            #### - **Ultrasonic module** (Trig GPIO 23, Echo GPIO 24)
+  <img src="https://github.com/user-attachments/assets/fc7dd699-1beb-4e1b-839c-e6ea1c9aa654" width="50%" />
+  
 #### - **Ultrasonic module** (Trig GPIO 23, Echo GPIO 24)
   ![FIG3](https://github.com/user-attachments/assets/2179d177-d182-4b50-b5e9-68de2a1311d8)
 
