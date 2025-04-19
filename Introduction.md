@@ -56,7 +56,7 @@ This project delivers a "smart" wheelchair controller: ambient light, distance, 
   <img src="https://github.com/user-attachments/assets/6e951966-0cd0-40a9-8a7b-cd38768e5660" width="70%" alt="Raspberry Pi" />
 </p>
 
-### - **2.Sensors**
+### 2.Sensors
 
 #### - **2.1 Light sensor** (GPIO 16)                                  
   
@@ -68,7 +68,13 @@ This project delivers a "smart" wheelchair controller: ambient light, distance, 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/1d27bde6-b7b0-4c01-84a7-9ed85d17a059" width="70%" alt="Raspberry Pi" />
 </p>
-### 3.Actuators
+
+### 3. Streams  
+- **Reverse‑view camera** (MJPEG server on port 8080)
+  <p align="center">
+  <img src="https://github.com/user-attachments/assets/1d27bde6-b7b0-4c01-84a7-9ed85d17a059" width="70%" alt="Raspberry Pi" />
+</p>
+### 4.Actuators
 
 Motor 1 via H‑bridge (GPIO 17/27) with control button on GPIO 5
 
