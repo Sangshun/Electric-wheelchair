@@ -1,12 +1,21 @@
-#ifndef LIGHT_SENSOR_HPP
-#define LIGHT_SENSOR_HPP
+#ifndef LIGHTSENSOR_HPP
+#define LIGHTSENSOR_HPP
 
-#include <atomic>
 #include <functional>
+#include <thread>
+#include <atomic>
+#include <iostream>
+#include <stdexcept>
+#include <string>
 #include <gpiod.h>
 #include <csignal>
-#include <thread> 
 
+/**
+ * @brief LightSensor class encapsulates light sensor monitoring using libgpiod (C API).
+ *
+ * It monitors a specified GPIO pin for edge events and periodically reads the pin value.
+ * The sensor state (true for Dark, false for Light) is delivered via a callback.
+ */
 class LightSensor {
 public:
     using Callback = std::function<void(bool)>;
@@ -14,24 +23,28 @@ public:
     LightSensor(int gpio_pin, Callback callback);
     ~LightSensor();
 
+    // Start monitoring the light sensor
     void start();
+    // Stop monitoring
     void stop();
-    static void signal_handler(int signal);
-    static bool get_exit_flag() { return exit_flag_.load(); } 
-    static inline std::atomic<bool> exit_flag_{false};
 
 private:
-    const int gpio_pin_;
+    int gpio_pin_;
     Callback callback_;
-    std::atomic<bool> running_{false};
+    std::atomic<bool> running_;
+    // Make exit_flag_ static so it can be used in the static signal handler if needed.
+    static std::atomic<bool> exit_flag_;
     std::thread event_thread_;
 
-    gpiod_chip* chip_ = nullptr;
-    gpiod_line* line_ = nullptr;
-    //static inline std::atomic<bool> exit_flag_{false};
+    struct gpiod_chip* chip_;
+    struct gpiod_line* line_;
 
+    // Initialize GPIO for the sensor
     void initialize_gpio();
+    // Thread function to monitor events
     void event_monitor();
+    // (Removed the SIGINT handler installation)
+    static void signal_handler(int signal);
 };
 
-#endif // LIGHT_SENSOR_HPP
+#endif // LIGHTSENSOR_HPP
