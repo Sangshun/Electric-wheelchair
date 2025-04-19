@@ -15,20 +15,20 @@
 #include <termios.h>
 #include <unistd.h>
 #include <cctype>
-
+// EnhancedFilter class applies a digital filter to ECG data
 EnhancedFilter::EnhancedFilter(const std::vector<double>& b, const std::vector<double>& a)
     : b_coeff(b), a_coeff(a), x(5, 0.0), y(5, 0.0) {}
-
+// Processes input ECG signal through the filter
 std::vector<double> EnhancedFilter::process(const std::vector<double>& input) {
     std::vector<double> output;
     output.reserve(input.size());
     static double baseline = 0.0;
 
     for (auto sample : input) {
-        
+        // Baseline drift removal 
         baseline = 0.995 * baseline + 0.005 * sample;
         sample -= baseline;
-
+        // Apply digital filtering
         x = {sample, x[0], x[1], x[2], x[3]};
         y = {0.0, y[0], y[1], y[2], y[3]};
 
@@ -42,10 +42,10 @@ std::vector<double> EnhancedFilter::process(const std::vector<double>& input) {
     return output;
 }
 
-
+// Calculate heart rate from ECG peaks
 AdvancedHRCalculator::AdvancedHRCalculator()
     : last_valid_hr(0.0), qrs_window(200), min_interval(300), noise_count(0) {}
-
+// Detect R-peaks and update heart rate calculations
 void AdvancedHRCalculator::update_r_peak() {
     const auto now = std::chrono::system_clock::now();
     std::lock_guard<std::mutex> lock(data_mutex);
@@ -58,19 +58,19 @@ void AdvancedHRCalculator::update_r_peak() {
     auto interval = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_peak_time);
 
     // std::cerr << "? Ignoring unrealistically fast beat (interval: " << interval.count() << " ms)" << std::endl;
-    if (interval.count() < 500) {  
+    if (interval.count() < 500) {  // Ignore unrealistic heart rates
         return;
     }
 
     double new_hr = 60000.0 / interval.count();
 
     // std::cerr << "? Calculated BPM: " << new_hr << std::endl;
-    if (last_valid_hr > 0 && std::abs(new_hr - last_valid_hr) > 20) {
+    if (last_valid_hr > 0 && std::abs(new_hr - last_valid_hr) > 20) {  // Ignore sudden large heart rate jumps
         // std::cerr << "?? Sudden HR jump detected (from " << last_valid_hr 
         //           << " to " << new_hr << "), ignoring." << std::endl;
         return;
     }
-
+    // Update heart rate buffer
     if (new_hr >= 30.0 && new_hr <= 220.0) {
         hr_buffer.push_back(new_hr);
         if (hr_buffer.size() > 7) {
@@ -84,19 +84,19 @@ void AdvancedHRCalculator::update_r_peak() {
 
     last_peak_time = now;
 }
-
+// Return the most recent valid heart rate
 double AdvancedHRCalculator::get_heart_rate() const {
     std::lock_guard<std::mutex> lock(data_mutex);
     return last_valid_hr;
 }
-
+// Reset heart rate calculation state
 void AdvancedHRCalculator::reset_state() {
     std::lock_guard<std::mutex> lock(data_mutex);
     hr_buffer.clear();
     last_peak_time = std::chrono::system_clock::time_point{};
     noise_count = 0;
 }
-
+// Manage ECG processing pipeline
 StableECGProcessor::StableECGProcessor()
     : filter({{0.0034, 0.0, -0.0068, 0.0, 0.0034},
               {1.0, -3.6789, 5.1797, -3.3058, 0.8060}}),
@@ -107,29 +107,29 @@ StableECGProcessor::StableECGProcessor()
       signal_peak(0.0),
       last_peak_index(0)
 {}
-
+// Destructor stops processing thread
 StableECGProcessor::~StableECGProcessor() {
     stop();
 }
-
+// Start ECG processing loop
 void StableECGProcessor::start() {
     active.store(true);
     processor = std::thread(&StableECGProcessor::processing_loop, this);
 }
-
+// Stop ECG processing loop
 void StableECGProcessor::stop() {
     active.store(false);
     data_ready.notify_all();
     if (processor.joinable())
         processor.join();
 }
-
+// Add ECG samples to processing buffer
 void StableECGProcessor::add_samples(const std::vector<double>& samples) {
     std::lock_guard<std::mutex> lock(buffer_mutex);
     circular_buffer.insert(circular_buffer.end(), samples.begin(), samples.end());
     data_ready.notify_one();
 }
-
+// Return the current heart rate
 double StableECGProcessor::current_hr() const {
     return calculator.get_heart_rate();
 }
@@ -161,17 +161,17 @@ void StableECGProcessor::processing_loop() {
         // }
 
         ++print_counter;
-
+        // Maintain sliding window
         window.insert(window.end(), filtered.begin(), filtered.end());
         if (window.size() > SAMPLE_RATE * WINDOW_SECONDS) {
             window.erase(window.begin(), window.begin() + (window.size() - SAMPLE_RATE * WINDOW_SECONDS));
         }
 
-        update_thresholds(window);
-        detect_r_peaks(filtered);
+        update_thresholds(window);  // Update detection thresholds
+        detect_r_peaks(filtered);  // Detect QRS
     }
 }
-
+// Fetch data from buffer for processing
 std::vector<double> StableECGProcessor::fetch_data() {
     std::unique_lock<std::mutex> lock(buffer_mutex);
     data_ready.wait(lock, [this]() { return !circular_buffer.empty() || !active.load(); });
@@ -181,7 +181,7 @@ std::vector<double> StableECGProcessor::fetch_data() {
     }
     return data;
 }
-
+// Adaptive threshold algorithm
 void StableECGProcessor::update_thresholds(const std::vector<double>& window) {
     double current_max = *std::max_element(window.begin(), window.end());
 
@@ -197,7 +197,7 @@ void StableECGProcessor::update_thresholds(const std::vector<double>& window) {
     //           << " | Signal Peak: " << signal_peak
     //           << std::endl;
 }
-
+// R-Peak detection logic
 void StableECGProcessor::detect_r_peaks(const std::vector<double>& data) {
     static size_t last_peak_index = 0;
     const size_t min_distance = 30;  
@@ -215,7 +215,7 @@ void StableECGProcessor::detect_r_peaks(const std::vector<double>& data) {
             last_peak_index = i;
         }
     }
-}
+}// Read ECG data from a serial port
 ReliableSerialReader::ReliableSerialReader(const std::string& port, StableECGProcessor& proc)
     : processor(proc), active(false)
 {
@@ -242,16 +242,16 @@ ReliableSerialReader::ReliableSerialReader(const std::string& port, StableECGPro
         throw std::runtime_error("Failed to set serial attributes: " + std::string(strerror(errno)));
     }
 }
-
+// Destructor stops reading thread and closes the serial port
 ReliableSerialReader::~ReliableSerialReader() {
     stop();
 }
-
+// Start serial data reading thread
 void ReliableSerialReader::start() {
     active.store(true);
     reader = std::thread(&ReliableSerialReader::reading_loop, this);
 }
-
+// Stop serial data reading thread
 void ReliableSerialReader::stop() {
     active.store(false);
     if (reader.joinable())
@@ -261,15 +261,15 @@ void ReliableSerialReader::stop() {
         fd = -1;
     }
 }
-
+// Serial data acquisition
 void ReliableSerialReader::reading_loop() {
     char read_buffer[BUFFER_SIZE];
     std::string line_buffer;
     auto last_print_time = std::chrono::steady_clock::now();  
 
-    while (active.load()) {
+    while (active.load()) {  // Read raw bytes from serial port
         ssize_t n = ::read(fd, read_buffer, BUFFER_SIZE);
-        
+        // Handle read errors
         if (n < 0) {
             if (errno == EAGAIN) continue;
             
@@ -278,7 +278,7 @@ void ReliableSerialReader::reading_loop() {
         }
         if (n == 0) continue;
 
-        line_buffer.append(read_buffer, n);
+        line_buffer.append(read_buffer, n);  // Append new data
 
         size_t pos;
         while ((pos = line_buffer.find('\n')) != std::string::npos) {
@@ -290,7 +290,7 @@ void ReliableSerialReader::reading_loop() {
             line.erase(0, line.find_first_not_of(" \t\r\n"));
 
             if (line.empty()) continue;
-
+            // Parse CSV formatted data
             std::istringstream iss(line);
             std::string token;
             std::vector<std::string> tokens;
@@ -300,7 +300,7 @@ void ReliableSerialReader::reading_loop() {
                     tokens.push_back(token);
                 }
             }
-
+            // Process ECG values
             if (tokens.size() >= 3) {
                 std::string ecgToken = tokens[2];
 
@@ -308,7 +308,7 @@ void ReliableSerialReader::reading_loop() {
                     double value = std::stod(ecgToken);
                     value *= 0.7;
                     
-                    
+                    // Debug output
                     auto now = std::chrono::steady_clock::now();
                     if (now - last_print_time >= std::chrono::seconds(2)) {
                         std::cerr << "Converted ECG Value: " << value << std::endl;
