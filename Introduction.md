@@ -32,7 +32,7 @@ This project delivers a "smart" wheelchair controller: ambient light, distance, 
 │ └──┬──┘      └──┬──┘       └─┬───┘        └──┬───┘  │
 │    │            │            │               │      │
 │ ┌──▼───┐     ┌──▼──┐      ┌──▼──┐         ┌──▼──┐   │
-│ │Motor │ ... │ LED │ ...  │Motor│ ...     │ SYN │   │
+│ │Motor │ ... │ LED │ ...  │Motor│   ...   │ SYN │   │
 │ │Ctrl  │     │Ctrl │      │Ctrl │         │6288 │   │
 │ └──────┘     └─────┘      └─────┘         └─────┘   │
 │                                                     │
