@@ -3,6 +3,10 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <gpiod.h>
+#include <iostream>    // for std::cout, std::cerr
+#include <ostream>     // for std::endl
+#include <stdexcept>   // for std::runtime_error
+#include <string>      // for std::to_string
 
 // Constructor, initialize gpio_pin_ and callback_, and set the signal processing function
 LightSensor::LightSensor(int gpio_pin, Callback callback)
