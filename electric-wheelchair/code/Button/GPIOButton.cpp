@@ -2,7 +2,7 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
-
+// Initialize GPIO button
 GPIOButton::GPIOButton(unsigned gpio,
                        const std::function<void()>& shortCallback,
                        const std::function<void()>& longCallback)
@@ -13,12 +13,12 @@ GPIOButton::GPIOButton(unsigned gpio,
 {
     // No additional initialization required
 }
-
+// Stop button polling and releases the GPIO line
 GPIOButton::~GPIOButton() {
     stop();
     line_.release();
 }
-
+// Start monitoring the button press events
 bool GPIOButton::start() {
     try {
         // Request the GPIO line for both falling and rising edge events
@@ -28,25 +28,25 @@ bool GPIOButton::start() {
         return false;
     }
     running_ = true;
-    pollThread_ = std::thread(&GPIOButton::pollButton, this);
+    pollThread_ = std::thread(&GPIOButton::pollButton, this);  // Start a separate thread to continuously monitor button events
     return true;
 }
-
+// Stop button event monitoring
 void GPIOButton::stop() {
     running_ = false;
     if (pollThread_.joinable())
         pollThread_.join();
     line_.release();
 }
-
+// Thread function to continuously monitor button events
 void GPIOButton::pollButton() {
-    std::chrono::milliseconds timeout(100);
-    std::chrono::steady_clock::time_point pressTime;
+    std::chrono::milliseconds timeout(100);  // Event wait timeout
+    std::chrono::steady_clock::time_point pressTime;  // Store button press time
 
     while (running_) {
         bool eventOccurred = false;
         try {
-            eventOccurred = line_.event_wait(timeout);
+            eventOccurred = line_.event_wait(timeout);  // Wait for a GPIO event
         } catch (const std::exception &e) {
             std::cerr << "Error waiting for event on GPIO " << gpio_ << ": " << e.what() << std::endl;
             break;
@@ -60,19 +60,19 @@ void GPIOButton::pollButton() {
                 std::cerr << "Error reading event on GPIO " << gpio_ << ": " << e.what() << std::endl;
                 continue;
             }
-
-            if (event.event_type == gpiod::line_event::FALLING_EDGE) {
+            // Detect button press and release
+            if (event.event_type == gpiod::line_event::FALLING_EDGE) {  // Button is pressed: record the timestamp
                 pressTime = std::chrono::steady_clock::now();
-            } else if (event.event_type == gpiod::line_event::RISING_EDGE) {
+            } else if (event.event_type == gpiod::line_event::RISING_EDGE) {  // Button is released and calculate press duration
                 auto releaseTime = std::chrono::steady_clock::now();
                 auto pressDuration = std::chrono::duration_cast<std::chrono::milliseconds>(releaseTime - pressTime);
                 if (pressDuration < debounceDelay_) {
-                    continue;
+                    continue;  // Ignore noise
                 }
                 if (pressDuration >= longPressThreshold_) {
-                    longCallback_();
+                    longCallback_();  // Long press detected
                 } else {
-                    shortCallback_();
+                    shortCallback_();  // Short press detected
                 }
             }
         }
