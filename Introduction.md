@@ -66,14 +66,15 @@ This project delivers a "smart" wheelchair controller: ambient light, distance, 
 
 #### - **2.4 ECG serial module** (/dev/ttyUSB0)
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/1d27bde6-b7b0-4c01-84a7-9ed85d17a059" width="70%" alt="Raspberry Pi" />
+  <img src="https://github.com/user-attachments/assets/1d27bde6-b7b0-4c01-84a7-9ed85d17a059" width="50%" alt="Raspberry Pi" />
 </p>
 
 ### 3. Streams  
 - **Reverse‑view camera** (MJPEG server on port 8080)
   <p align="center">
-  <img src="https://github.com/user-attachments/assets/1d27bde6-b7b0-4c01-84a7-9ed85d17a059" width="70%" alt="Raspberry Pi" />
+  <img src="https://github.com/user-attachments/assets/0458833e-d222-4392-9483-41c5ab458deb" width="70%" alt="Raspberry Pi" />
 </p>
+
 ### 4.Actuators
 
 Motor 1 via H‑bridge (GPIO 17/27) with control button on GPIO 5
