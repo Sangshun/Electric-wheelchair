@@ -19,7 +19,7 @@ This project delivers a "smart" wheelchair controller: ambient light, distance, 
 
 ## 🏗️ System Architecture
 
-```text
+
                                     ┌─────────────────────────────────────────────────────┐
                                     │                   Raspberry Pi                      │
                                     │ ┌─────────┐  ┌──────────┐  ┌──────────┐  ┌───────┐  │
@@ -46,3 +46,29 @@ This project delivers a "smart" wheelchair controller: ambient light, distance, 
                                     │ │  live dashboard     │  reverse camera stream    │ │
                                     │ └─────────────────────────────────────────────────┘ │
                                     └─────────────────────────────────────────────────────┘
+
+## 🛠️ Hardware Setup
+
+Raspberry Pi (Model 5 with 40‑pin GPIO header)
+
+Sensors
+
+Light sensor (GPIO 16)
+
+Ultrasonic module (Trig GPIO 23, Echo GPIO 24)
+
+PIR motion sensor (GPIO 25)
+
+ECG serial module (/dev/ttyUSB0)
+
+Actuators
+
+Motor 1 via H‑bridge (GPIO 17/27) with control button on GPIO 5
+
+Motor 2 via H‑bridge (GPIO 22/26) with control button on GPIO 6
+
+LEDs (GPIO 9 and GPIO 11) for ambient and motion indications
+
+SYN6288 TTS module (/dev/serial0)
+
+Network: Ethernet or Wi‑Fi for web UI
