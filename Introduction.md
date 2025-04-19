@@ -84,8 +84,7 @@ This project delivers a "smart" wheelchair controller: ambient light, distance, 
 #### - **4.3 LEDs (GPIO 9 and GPIO 11) for ambient and motion indications**
 
 #### - **4.4 SYN6288 TTS module (/dev/serial0)**
-
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/3c078222-af2d-4d17-ad20-dedf3ce6155b" width="30%" alt="Raspberry Pi" />
+  <img src="https://github.com/user-attachments/assets/3c078222-af2d-4d17-ad20-dedf3ce6155b" width="50%" alt="Raspberry Pi" />
 </p>
 
