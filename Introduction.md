@@ -52,9 +52,9 @@ This project delivers a "smart" wheelchair controller: ambient light, distance, 
 ## 🛠️ Hardware Setup
 
 ### 1. Raspberry Pi (Model 5 with 40‑pin GPIO header)
-<p align="center">
+  <p align="center">
     ![FIG1](https://github.com/user-attachments/assets/6e951966-0cd0-40a9-8a7b-cd38768e5660)
-</p>
+  </p>
 
 ### - **2.Sensors**
 
