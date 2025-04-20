@@ -112,6 +112,8 @@ sudo raspi-config
 
 **Reboot after changes to apply.**
 
+---
+
 ## 💻 Software Build & Installation
 
 **Prerequisites:**
@@ -149,6 +151,8 @@ g++ -std=c++17 \
   https://www.realvnc.com/en/connect/download/viewer/
 - **SSH (terminal):** Download PuTTY from
   https://www.putty.org/
+
+---
   
 ## 🚀 System Validation
 
