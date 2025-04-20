@@ -102,6 +102,13 @@ The division of the code is as follows:
   <img src="https://github.com/user-attachments/assets/3c078222-af2d-4d17-ad20-dedf3ce6155b" width="50%" alt="Raspberry Pi" />
 </p>
 
+### 5. Wheelchair Overview
+
+  <p align="center">
+  <img src="https://github.com/user-attachments/assets/cee450aa-5d63-4733-bd34-65e415bbb03d" width="20%" alt="Raspberry Pi" />
+</p>
+
+
 ---
 
 ## ⚙️ Raspberry Pi Configuration
