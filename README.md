@@ -30,6 +30,11 @@ The division of the code is as follows:
 
 ## 🏗️ System Architecture
 
+
+  <p align="center">
+  <img src="https://github.com/user-attachments/assets/cee450aa-5d63-4733-bd34-65e415bbb03d" width="100%" alt="Raspberry Pi" />
+</p>
+
 <div align="center">
 <pre style="text-align: left;">
 ┌─────────────────────────────────────────────────────┐
