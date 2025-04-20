@@ -25,7 +25,7 @@ void UltrasonicSensor::signal_handler(int signal) {
 
 void UltrasonicSensor::reset_gpio() {
     gpiod_line_release(echo_line_);
-    echo_line_ = gpiod_chip_get_line(chip_, echo_pin_);
+    echo_line_ = gpiod_chip_get_line(chip_, echo_pin_);  // Re-acquire echo line
      if (gpiod_line_request_both_edges_events(echo_line_, "echo") < 0) {  // Reconfigure edge detection
         throw std::runtime_error("Failed to reconfigure Echo");
     }
@@ -37,7 +37,7 @@ void UltrasonicSensor::initialize_gpio() {
 
     trig_line_ = gpiod_chip_get_line(chip_, trig_pin_);  // Trigger control line
     echo_line_ = gpiod_chip_get_line(chip_, echo_pin_);  // Echo detection line
-    if (!trig_line_ || !echo_line_) {
+    if (!trig_line_ || !echo_line_) {  // Validate pin acquisition
         cleanup_gpio();
         throw std::runtime_error("Failed to get GPIO lines");
     }
@@ -90,16 +90,16 @@ float UltrasonicSensor::measure_pulse() {
     return -1;
     }
 
-    auto start = std::chrono::steady_clock::now();
+    auto start = std::chrono::steady_clock::now();  // Pulse start time
 
-    if (!wait_event(GPIOD_LINE_EVENT_FALLING_EDGE)) {
+    if (!wait_event(GPIOD_LINE_EVENT_FALLING_EDGE)) {  // Wait for echo end
         std::cerr << "[Debug] Falling edge not detected\n";
         return -1;
     }
-    auto end = std::chrono::steady_clock::now();
+    auto end = std::chrono::steady_clock::now();  // Pulse end time
 
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-    float distance = (duration.count() * 0.0343) / 2;
+    float distance = (duration.count() * 0.0343) / 2;  // Convert μs to cm (sound speed 343m/s)
     //std::cerr << "[Debug] Duration: " << duration.count() << "us, Distance: " << distance << "cm\n";
     return distance;
 }
@@ -120,7 +120,7 @@ float UltrasonicSensor::get_distance() {
 
     float distance = measure_pulse();  // Get raw measurement
 
-    if (distance < 2 || distance > 450) { 
+    if (distance < 2 || distance > 450) {  // Validate physical range 
         return -1;
     }
 
