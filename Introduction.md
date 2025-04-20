@@ -119,7 +119,7 @@ Prerequisites
 sudo apt update
 sudo apt install -y build-essential gpiod libgpiod-dev libboost-system-dev \
   libjpeg-dev libcamera-dev pkg-config git
-```bash
+```
 Add your user to groups:
 ```bash
 sudo usermod -aG gpio,dialout $USER
