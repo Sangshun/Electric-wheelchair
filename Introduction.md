@@ -76,7 +76,7 @@ Collaborators: 1.longqishi223: Cunhui Hu 2986514H 2.kabalaqiou: Jiacheng Yu 3028
 </p>
 
 ### 3. Streams  
-- **Reverse‑view camera (MJPEG server on port 8080): provides a live video feed from the mounted camera module, useful for backing up and navigation assistance.**
+- **Reverse‑view camera (MJPEG server on port 8080):**  provides a live video feed from the mounted camera module, useful for backing up and navigation assistance.
   <p align="center">
   <img src="https://github.com/user-attachments/assets/0458833e-d222-4392-9483-41c5ab458deb" width="20%" alt="Raspberry Pi" />
 </p>
