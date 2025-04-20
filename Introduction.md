@@ -62,7 +62,7 @@ Collaborators: 1.longqishi223: Cunhui Hu 2986514H 2.kabalaqiou: Jiacheng Yu 3028
   <img src="https://github.com/user-attachments/assets/6e951966-0cd0-40a9-8a7b-cd38768e5660" width="70%" alt="Raspberry Pi" />
 </p>
 
-### 2.Sensors
+### 2. Sensors
 
 - **Light sensor (GPIO 16):** can detect ambient light levels in real time, enabling the system to switch LEDs on in darkness and off in bright conditions.                                    
   
@@ -81,7 +81,7 @@ Collaborators: 1.longqishi223: Cunhui Hu 2986514H 2.kabalaqiou: Jiacheng Yu 3028
   <img src="https://github.com/user-attachments/assets/0458833e-d222-4392-9483-41c5ab458deb" width="20%" alt="Raspberry Pi" />
 </p>
 
-### 4.Actuators
+### 4. Actuators
 
 - **Motor 1 via H‑bridge (GPIO 17/27) with control button on GPIO 5:** drives forward/backward motion with tactile button input and TTS feedback.  
 
@@ -150,12 +150,12 @@ Execution:
 ```bash
 sudo ./final_system
 ```
-Sensor dashboard: Verify web UI at http://<pi-ip>:8000 shows live data.
+**Sensor dashboard:** Verify web UI at http://<pi-ip>:8000 shows live data.
 
-Reverse camera: Access http://<pi-ip>:8080 to see MJPEG stream.
+**Reverse camera:** Access http://<pi-ip>:8080 to see MJPEG stream.
 
-LED behavior: In dark ambient, LEDs steady on; in bright ambient, LEDs off until either motor runs—then blink.
+**LED behavior:** In dark ambient, LEDs steady on; in bright ambient, LEDs off until either motor runs—then blink.
 
-Motor controls: Buttons on GPIO 5/6 trigger forward/backward and rise/fall motions; verify TTS announcements.
+**Motor controls:** Buttons on GPIO 5/6 trigger forward/backward and rise/fall motions; verify TTS announcements.
 
-ECG processing: Confirm converted ECG values appear on console and web UI.
+**ECG processing:** Confirm converted ECG values appear on console and web UI.
