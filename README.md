@@ -32,7 +32,7 @@ The division of the code is as follows:
 
 
   <p align="center">
-  <img src="https://github.com/user-attachments/assets/cee450aa-5d63-4733-bd34-65e415bbb03d" width="50%" alt="Raspberry Pi" />
+  <img src="https://github.com/user-attachments/assets/cee450aa-5d63-4733-bd34-65e415bbb03d" width="20%" alt="Raspberry Pi" />
 </p>
 
 <div align="center">
