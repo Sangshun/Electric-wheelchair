@@ -146,7 +146,11 @@ g++ -std=c++17 \
 ```
 ## 🚀 System Validation
 
-Sensor dashboard: Launch ./final_system; verify web UI at http://<pi-ip>:8000 shows live data.
+Execution & Verification
+```bash
+sudo ./final_system
+```
+Sensor dashboard: Verify web UI at http://<pi-ip>:8000 shows live data.
 
 Reverse camera: Access http://<pi-ip>:8080 to see MJPEG stream.
 
