@@ -115,17 +115,17 @@ Reboot after changes to apply.
 💻 Software Build & Installation
 
 Prerequisites
-
+```bash
 sudo apt update
 sudo apt install -y build-essential gpiod libgpiod-dev libboost-system-dev \
   libjpeg-dev libcamera-dev pkg-config git
-
+```bash
 Add your user to groups:
-
+```bash
 sudo usermod -aG gpio,dialout $USER
-
+```
 Compile
-
+```bash
 git clone https://github.com/Sangshun/Electric-wheelchair.git
 cd Electric-wheelchair/electric-wheelchair/code/main
 g++ -std=c++17 \
@@ -145,7 +145,7 @@ g++ -std=c++17 \
     -o final_system \
     -lpthread -lgpiodcxx -lgpiod -lboost_system \
     $(pkg-config --libs libcamera) -ljpeg
-
+```
 ## 🚀 System Validation
 
 Sensor dashboard: Launch ./final_system; verify web UI at http://<pi-ip>:8000 shows live data.
