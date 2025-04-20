@@ -17,10 +17,16 @@ This project delivers a "smart" wheelchair controller: ambient light, distance, 
 
 This final version program is a comprehensive real-time embedded system running on a Raspberry Pi, written in C++ using an object-oriented approach. It controls a motor via GPIO17 and GPIO27, with a button on GPIO5 that triggers different motor states: a short press sets the motor to FORWARD (accompanied by audible feedback from the SYN6288 TTS module on /dev/serial0), while a long press sets it to BACKWARD, launching a reverse camera server (ip:8080). In addition, a second motor is controlled via GPIO22 and GPIO26 using a button on GPIO6; a short press sets this motor to RISE (with audible feedback "RISE"), and a long press sets it to FALL (with audible feedback "FALL"). Additionally, the system monitors ambient light through a sensor on GPIO16, measures distance with an ultrasonic sensor using GPIO23 (trigger) and GPIO24 (echo), and detects motion using a PIR sensor on GPIO25 (via gpiochip0). It also processes ECG data from a module connected through /dev/ttyUSB0 and extracts converted ECG values for display. An integrated HTTP server built with Boost.Asio listens on ip:8000 and provides a dynamic web dashboard that updates sensor data in real time.
 
-Our social media links： https://www.youtube.com/@kabalaqigou
+Our social media links： **https://www.youtube.com/@kabalaqigou**
 
 Collaborators: 1.longqishi223: Cunhui Hu 2986514H 2.kabalaqiou: Jiacheng Yu 3028341Y 3.Sangshun: Ziyao Ji 2968717J 4.ccliuup: Chaoyu Liu 2978613L 5.Doltonz: Jiaming Zhang 2970743Z
-
+The division of the code is as follows:
+1. **Ziyao Ji (2968717J)** completed the camera_preview and light code.
+2. **Chaoyu Liu (2978613L)** completed the ecg_processor and button code.
+3. **Jiacheng Yu (3028341Y)** completed the pir_sensor code and structure design.
+4. **Cunhui Hu (2986514H)** completed the syn6288_test, motor and main code.
+5. **Jiaming Zhang (2970743Z)** completed the ultrasonic and main code.
+   
 ---
 
 ## 🏗️ System Architecture
