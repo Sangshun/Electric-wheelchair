@@ -64,13 +64,13 @@ Collaborators: 1.longqishi223: Cunhui Hu 2986514H 2.kabalaqiou: Jiacheng Yu 3028
 
 ### 2.Sensors
 
-- **Light sensor** (GPIO 16): can detect ambient light levels in real time, enabling the system to switch LEDs on in darkness and off in bright conditions.                                    
+- **Light sensor (GPIO 16):** can detect ambient light levels in real time, enabling the system to switch LEDs on in darkness and off in bright conditions.                                    
   
-#### - **2.2 Ultrasonic module** (Trig GPIO 23, Echo GPIO 24): measures distance by emitting ultrasonic pulses and timing their echo, used for obstacle detection and proximity alerts.  
+- **Ultrasonic module (Trig GPIO 23, Echo GPIO 24):**  measures distance by emitting ultrasonic pulses and timing their echo, used for obstacle detection and proximity alerts.  
 
-#### - **2.3 PIR motion sensor** (GPIO 25): senses infrared radiation changes from moving objects, allowing the system to detect human presence or motion events.  
+- **PIR motion sensor (GPIO 25):**  senses infrared radiation changes from moving objects, allowing the system to detect human presence or motion events.  
 
-#### - **2.4 ECG serial module** (/dev/ttyUSB0): streams raw electrocardiogram data over a serial port, which is processed to extract heart‑rate values for monitoring.
+- **ECG serial module (/dev/ttyUSB0):**  streams raw electrocardiogram data over a serial port, which is processed to extract heart‑rate values for monitoring.
 <p align="center">
   <img src="https://github.com/user-attachments/assets/1d27bde6-b7b0-4c01-84a7-9ed85d17a059" width="50%" alt="Raspberry Pi" />
 </p>
@@ -83,13 +83,13 @@ Collaborators: 1.longqishi223: Cunhui Hu 2986514H 2.kabalaqiou: Jiacheng Yu 3028
 
 ### 4.Actuators
 
-#### - **4.1 Motor 1 via H‑bridge (GPIO 17/27) with control button on GPIO 5：drives forward/backward motion with tactile button input and TTS feedback.  **
+- **Motor 1 via H‑bridge (GPIO 17/27) with control button on GPIO 5:** drives forward/backward motion with tactile button input and TTS feedback.  
 
-#### - **4.2 Motor 2 via H‑bridge (GPIO 22/26) with control button on GPIO 6: handles rise/fall motion similarly, with distinct voice prompts.  **
+- **Motor 2 via H‑bridge (GPIO 22/26) with control button on GPIO 6:**  handles rise/fall motion similarly, with distinct voice prompts.  
 
-#### - **4.3 LEDs (GPIO 9 and GPIO 11) for ambient and motion indications: indicate ambient light state by steady glow or blink during any motor activity.  **
+- **LEDs (GPIO 9 and GPIO 11) for ambient and motion indications:**  indicate ambient light state by steady glow or blink during any motor activity.  
 
-#### - **4.4 SYN6288 TTS module (/dev/serial0): delivers audible voice prompts for motor commands and status updates.**
+- **SYN6288 TTS module (/dev/serial0):**  delivers audible voice prompts for motor commands and status updates.
 <p align="center">
   <img src="https://github.com/user-attachments/assets/3c078222-af2d-4d17-ad20-dedf3ce6155b" width="50%" alt="Raspberry Pi" />
 </p>
