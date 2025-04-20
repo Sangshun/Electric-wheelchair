@@ -1,9 +1,0 @@
-Explanation of the first version of the code: 
-Dear Professor, 
-We are sorry that we didn't know how to do version control at first, so the first version of the code was submitted just by one member Ziyao Ji (2968717J). 
-The division of the code is as follows:
-1. Ziyao Ji (2968717J) completed the camera_preview and light code.
-2. Chaoyu Liu (2978613L) completed the ecg_processor and button code.
-3. Jiacheng Yu (3028341Y) completed the pir_sensor code and structure design.
-4. Cunhui Hu (2986514H) completed the syn6288_test, motor and main code.
-5. Jiaming Zhang (2970743Z) completed the ultrasonic and main code.
