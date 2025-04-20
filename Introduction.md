@@ -64,7 +64,7 @@ Collaborators: 1.longqishi223: Cunhui Hu 2986514H 2.kabalaqiou: Jiacheng Yu 3028
 
 ### 2.Sensors
 
-#### - **2.1 Light sensor** (GPIO 16): can detect ambient light levels in real time, enabling the system to switch LEDs on in darkness and off in bright conditions.                                    
+- **Light sensor** (GPIO 16): can detect ambient light levels in real time, enabling the system to switch LEDs on in darkness and off in bright conditions.                                    
   
 #### - **2.2 Ultrasonic module** (Trig GPIO 23, Echo GPIO 24): measures distance by emitting ultrasonic pulses and timing their echo, used for obstacle detection and proximity alerts.  
 
