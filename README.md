@@ -104,6 +104,7 @@ The division of the code is as follows:
 
 ### 5. Wheelchair Overview
 
+The wheelchair’s main support frame was **3D‑printed** to maximize structural strength, while the rear wheels, seating surface, and backrest were handcrafted from **stiff cardboard**. To join these diverse materials, we used a combination of **hot‑melt glue**, **electrical tape** and other adhesives, each chosen to suit the specific contact surfaces. The completed assembly is shown below:
   <p align="center">
   <img src="https://github.com/user-attachments/assets/cee450aa-5d63-4733-bd34-65e415bbb03d" width="20%" alt="Raspberry Pi" />
 </p>
