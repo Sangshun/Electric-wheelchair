@@ -97,3 +97,62 @@ Collaborators: 1.longqishi223: Cunhui Hu 2986514H 2.kabalaqiou: Jiacheng Yu 3028
 ---
 
 ## ⚙️ Raspberry Pi Configuration
+Before building, run:
+
+sudo raspi-config
+
+Interface Options → Serial Port: Enable serial hardware; disable login shell
+
+Interface Options → SPI: (Optional) Disable if SPI peripherals conflict with GPIO 9/11
+
+Localization Options: Set locale, timezone, keyboard
+
+System Options → Boot / Auto Login: Text console with auto login
+
+Reboot after changes to apply.
+
+💻 Software Build & Installation
+
+Prerequisites
+
+sudo apt update
+sudo apt install -y build-essential gpiod libgpiod-dev libboost-system-dev \
+  libjpeg-dev libcamera-dev pkg-config git
+
+Add your user to groups:
+
+sudo usermod -aG gpio,dialout $USER
+
+Compile
+
+git clone https://github.com/Sangshun/Electric-wheelchair.git
+cd Electric-wheelchair/electric-wheelchair/code/main
+g++ -std=c++17 \
+    -I../ecg_processor -I../motor -I../Button -I../LightSensor \
+    -I../UltrasonicSensor -I../pir_sensor -I../syn6288_controller \
+    -I../camera -I../LED \
+    $(pkg-config --cflags libcamera) main.cpp \
+    ../ecg_processor/ecg_processor.cpp \
+    ../motor/MotorController.cpp \
+    ../Button/GPIOButton.cpp \
+    ../LightSensor/LightSensor.cpp \
+    ../UltrasonicSensor/UltrasonicSensor.cpp \
+    ../pir_sensor/pir_sensor.cpp \
+    ../syn6288_controller/syn6288_controller.cpp \
+    ../camera/mjpeg_server.cpp \
+    ../LED/LEDController.cpp \
+    -o final_system \
+    -lpthread -lgpiodcxx -lgpiod -lboost_system \
+    $(pkg-config --libs libcamera) -ljpeg
+
+## 🚀 System Validation
+
+Sensor dashboard: Launch ./final_system; verify web UI at http://<pi-ip>:8000 shows live data.
+
+Reverse camera: Access http://<pi-ip>:8080 to see MJPEG stream.
+
+LED behavior: In dark ambient, LEDs steady on; in bright ambient, LEDs off until either motor runs—then blink.
+
+Motor controls: Buttons on GPIO 5/6 trigger forward/backward and rise/fall motions; verify TTS announcements.
+
+ECG processing: Confirm converted ECG values appear on console and web UI.
