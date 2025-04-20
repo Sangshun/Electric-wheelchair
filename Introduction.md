@@ -97,7 +97,7 @@ Collaborators: 1.longqishi223: Cunhui Hu 2986514H 2.kabalaqiou: Jiacheng Yu 3028
 ---
 
 ## ⚙️ Raspberry Pi Configuration
-Before building, run:
+**Before building, run:**
 ```bash
 sudo raspi-config
 ```
@@ -110,20 +110,20 @@ sudo raspi-config
 
 **System Options → Boot / Auto Login:** Text console with auto login
 
-Reboot after changes to apply.
+**Reboot after changes to apply.**
 
 ## 💻 Software Build & Installation
 
-Prerequisites:
+**Prerequisites:**
 ```bash
 sudo apt update
 sudo apt install -y build-essential gpiod libgpiod-dev libboost-system-dev libjpeg-dev libcamera-dev pkg-config git
 ```
-Clone our codes:
+**Clone our codes:**
 ```bash
 git clone https://github.com/Sangshun/Electric-wheelchair.git
 ```
-Compile:
+**Compile:**
 ```bash
 cd Electric-wheelchair/electric-wheelchair/code/main
 g++ -std=c++17 \
@@ -146,7 +146,7 @@ g++ -std=c++17 \
 ```
 ## 🚀 System Validation
 
-Execution:
+**Execution:**
 ```bash
 sudo ./final_system
 ```
