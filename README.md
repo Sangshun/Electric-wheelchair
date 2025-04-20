@@ -23,7 +23,7 @@ The division of the code is as follows:
 1. **Sangshun: Ziyao Ji (2968717J)** completed the **camera_preview** and **light code**.
 2. **ccliuup: Chaoyu Liu (2978613L)** completed the **ecg_processor** and **button code**.
 3. **kabalaqiou: Jiacheng Yu (3028341Y)** completed the **pir_sensor code** and **structure design**.
-4. **longqishi223: Cunhui Hu (2986514H)** completed the **syn6288_test** **motor** and **main code**.
+4. **longqishi223: Cunhui Hu (2986514H)** completed the **syn6288_test** , **motor** and **main code**.
 5. **Doltonz: Jiaming Zhang (2970743Z)** completed the **ultrasonic** and **main code**.
    
 ---
