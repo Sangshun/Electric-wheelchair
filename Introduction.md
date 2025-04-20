@@ -112,9 +112,9 @@ sudo raspi-config
 
 Reboot after changes to apply.
 
-💻 Software Build & Installation
+## 💻 Software Build & Installation
 
-Prerequisites
+Prerequisites:
 ```bash
 sudo apt update
 sudo apt install -y build-essential gpiod libgpiod-dev libboost-system-dev libjpeg-dev libcamera-dev pkg-config git
@@ -123,7 +123,7 @@ Clone our codes:
 ```bash
 git clone https://github.com/Sangshun/Electric-wheelchair.git
 ```
-Compile
+Compile:
 ```bash
 cd Electric-wheelchair/electric-wheelchair/code/main
 g++ -std=c++17 \
