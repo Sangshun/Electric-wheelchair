@@ -144,6 +144,12 @@ g++ -std=c++17 \
     -lpthread -lgpiodcxx -lgpiod -lboost_system \
     $(pkg-config --libs libcamera) -ljpeg
 ```
+**Remote Access:**
+- **GUI (VNC):** Download and install RealVNC Viewer from
+  https://www.realvnc.com/en/connect/download/viewer/
+- **SSH (terminal):** Download PuTTY from
+  https://www.putty.org/
+  
 ## 🚀 System Validation
 
 **Execution:**
