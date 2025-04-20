@@ -102,13 +102,13 @@ Before building, run:
 sudo raspi-config
 ```
 
-Interface Options → Serial Port: Enable serial hardware; disable login shell
+**Interface Options → Serial Port:** Enable serial hardware; disable login shell
 
-Interface Options → SPI: (Optional) Disable if SPI peripherals conflict with GPIO 9/11
+**Interface Options → SPI:** (Optional) Disable if SPI peripherals conflict with GPIO 9/11
 
-Localization Options: Set locale, timezone, keyboard
+**Localization Options:** Set locale, timezone, keyboard
 
-System Options → Boot / Auto Login: Text console with auto login
+**System Options → Boot / Auto Login:** Text console with auto login
 
 Reboot after changes to apply.
 
@@ -146,7 +146,7 @@ g++ -std=c++17 \
 ```
 ## 🚀 System Validation
 
-Execution & Verification
+Execution:
 ```bash
 sudo ./final_system
 ```
