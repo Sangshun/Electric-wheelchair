@@ -19,13 +19,12 @@ This final version program is a comprehensive real-time embedded system running 
 
 Our social media links： **https://www.youtube.com/@kabalaqigou**
 
-**Collaborators**: 1.**longqishi223: Cunhui Hu 2986514H** 2.**kabalaqiou: Jiacheng Yu 3028341Y** 3.**Sangshun: Ziyao Ji 2968717J** 4.**ccliuup: Chaoyu Liu 2978613L** **5.Doltonz: Jiaming Zhang 2970743Z**
 The division of the code is as follows:
-1. **Ziyao Ji (2968717J)** completed the camera_preview and light code.
-2. **Chaoyu Liu (2978613L)** completed the ecg_processor and button code.
-3. **Jiacheng Yu (3028341Y)** completed the pir_sensor code and structure design.
-4. **Cunhui Hu (2986514H)** completed the syn6288_test, motor and main code.
-5. **Jiaming Zhang (2970743Z)** completed the ultrasonic and main code.
+1. **Sangshun: Ziyao Ji (2968717J)** completed the **camera_preview** and **light code**.
+2. **ccliuup: Chaoyu Liu (2978613L)** completed the **ecg_processor** and **button code**.
+3. **kabalaqiou: Jiacheng Yu (3028341Y)** completed the **pir_sensor code** and **structure design**.
+4. **longqishi223: Cunhui Hu (2986514H)** completed the **syn6288_test** **motor** and **main code**.
+5. **Doltonz: Jiaming Zhang (2970743Z)** completed the **ultrasonic** and **main code**.
    
 ---
 
