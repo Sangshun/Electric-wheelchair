@@ -98,8 +98,9 @@ Collaborators: 1.longqishi223: Cunhui Hu 2986514H 2.kabalaqiou: Jiacheng Yu 3028
 
 ## ⚙️ Raspberry Pi Configuration
 Before building, run:
-
+```bash
 sudo raspi-config
+```
 
 Interface Options → Serial Port: Enable serial hardware; disable login shell
 
