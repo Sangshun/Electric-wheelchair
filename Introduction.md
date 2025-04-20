@@ -117,16 +117,14 @@ Reboot after changes to apply.
 Prerequisites
 ```bash
 sudo apt update
-sudo apt install -y build-essential gpiod libgpiod-dev libboost-system-dev \
-  libjpeg-dev libcamera-dev pkg-config git
+sudo apt install -y build-essential gpiod libgpiod-dev libboost-system-dev libjpeg-dev libcamera-dev pkg-config git
 ```
-Add your user to groups:
+Clone our codes:
 ```bash
-sudo usermod -aG gpio,dialout $USER
+git clone https://github.com/Sangshun/Electric-wheelchair.git
 ```
 Compile
 ```bash
-git clone https://github.com/Sangshun/Electric-wheelchair.git
 cd Electric-wheelchair/electric-wheelchair/code/main
 g++ -std=c++17 \
     -I../ecg_processor -I../motor -I../Button -I../LightSensor \
