@@ -1,4 +1,4 @@
-# Electric-WheelChair: Real‑Time Embedded Sensor & Actuator Dashboard
+# Electric WheelChair: Real‑Time Embedded Sensor & Actuator Dashboard
 
 This is **Team 4**’s smart electric wheelchair, designed to give older adults both mobility and standing assistance. In addition to driving forward and backward, a motor‑driven gear‑and‑rack mechanism tilts the seat cushion to help the user rise safely. An integrated ECG module constantly monitors heart signals, triggering an audible alarm if abnormal activity is detected to alert caregivers. Ambient lighting, ultrasonic obstacle sensing and motion detection further enhance safety, and voice prompts guide each operation. Modular by design, this platform can be extended with new sensors or features as needed.
 
