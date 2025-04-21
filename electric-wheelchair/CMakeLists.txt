@@ -92,11 +92,19 @@ target_link_libraries(final_system
 # -- Tests --
 enable_testing()
 
+# GPIOButton test
 add_executable(test_gpio_button
     tests/Button/test_gpio_button.cpp
 )
-target_link_libraries(test_gpio_button PRIVATE GPIOButton Threads::Threads)
+target_link_libraries(test_gpio_button
+  PRIVATE
+    GPIOButton
+    Threads::Threads
+    gpiodcxx
+    gpiod
+)
 add_test(NAME GPIOButtonTest COMMAND test_gpio_button)
+
 
 add_executable(test_motor_controller
     tests/motor/Motor_test.cpp
