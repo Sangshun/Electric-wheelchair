@@ -169,7 +169,11 @@ g++ -std=c++17 \
   https://www.putty.org/
 
 ---
-  
+
+##📦 CMake Build & Test
+
+---
+
 ## 🚀 System Validation
 
 **Execution:**
