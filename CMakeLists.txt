@@ -58,13 +58,7 @@ add_library(LEDController
 )
 target_include_directories(LEDController PUBLIC code/LED)
 
-add_library(HTTPServer
-    code/http_server/http_server.cpp
-    code/http_server/http_server.hpp
-)
-target_include_directories(HTTPServer PUBLIC code/http_server)
-
-# -- add tests --
+# -- enable testing and add module tests --
 enable_testing()
 
 # GPIOButton test
@@ -74,9 +68,9 @@ add_executable(test_gpio_button
 target_link_libraries(test_gpio_button PRIVATE GPIOButton pthread)
 add_test(NAME GPIOButtonTest COMMAND test_gpio_button)
 
-# MotorController test (file: Motor_test.cpp)
+# MotorController test
 add_executable(test_motor_controller
-    tests/motor/Motor_test.cpp
+    tests/motor/test_motor_controller.cpp
 )
 target_link_libraries(test_motor_controller PRIVATE MotorController pthread)
 add_test(NAME MotorControllerTest COMMAND test_motor_controller)
@@ -88,9 +82,9 @@ add_executable(test_light_sensor
 target_link_libraries(test_light_sensor PRIVATE LightSensor pthread)
 add_test(NAME LightSensorTest COMMAND test_light_sensor)
 
-# UltrasonicSensor test (file: test_ultrasonic.cpp)
+# UltrasonicSensor test
 add_executable(test_ultrasonic_sensor
-    tests/UltrasonicSensor/test_ultrasonic.cpp
+    tests/UltrasonicSensor/test_ultrasonic_sensor.cpp
 )
 target_link_libraries(test_ultrasonic_sensor PRIVATE UltrasonicSensor pthread)
 add_test(NAME UltrasonicSensorTest COMMAND test_ultrasonic_sensor)
@@ -102,16 +96,16 @@ add_executable(test_pir_controller
 target_link_libraries(test_pir_controller PRIVATE PIRController pthread)
 add_test(NAME PIRControllerTest COMMAND test_pir_controller)
 
-# ECGProcessor test (file: ecg_main.cpp)
+# ECGProcessor test
 add_executable(test_ecg_processor
-    tests/ecg_processor/ecg_main.cpp
+    tests/ecg_processor/test_ecg_processor.cpp
 )
 target_link_libraries(test_ecg_processor PRIVATE ECGProcessor pthread)
 add_test(NAME ECGProcessorTest COMMAND test_ecg_processor)
 
-# TTSController test (file: test_tts.cpp)
+# TTSController test
 add_executable(test_tts_controller
-    tests/syn6288_controller/test_tts.cpp
+    tests/syn6288_controller/test_syn6288_controller.cpp
 )
 target_link_libraries(test_tts_controller PRIVATE TTSController pthread)
 add_test(NAME TTSControllerTest COMMAND test_tts_controller)
@@ -123,16 +117,9 @@ add_executable(test_mjpeg_server
 target_link_libraries(test_mjpeg_server PRIVATE MJPEGServer pthread)
 add_test(NAME MJPEGServerTest COMMAND test_mjpeg_server)
 
-# LEDController test (file: test_led.cpp)
+# LEDController test
 add_executable(test_led_controller
-    tests/LED/test_led.cpp
+    tests/LED/test_led_controller.cpp
 )
 target_link_libraries(test_led_controller PRIVATE LEDController pthread)
 add_test(NAME LEDControllerTest COMMAND test_led_controller)
-
-# HTTPServer test (file: sensor_http_server.cpp)
-add_executable(test_http_server
-    tests/http_server/sensor_http_server.cpp
-)
-target_link_libraries(test_http_server PRIVATE HTTPServer pthread)
-add_test(NAME HTTPServerTest COMMAND test_http_server)
