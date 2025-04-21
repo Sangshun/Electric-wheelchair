@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.10)
 project(ElectricWheelchair)
 
 set(CMAKE_CXX_STANDARD 17)
+find_package(Threads REQUIRED)
 
-# -- add your library modules --
+# -- library modules --
 add_library(GPIOButton
     code/Button/GPIOButton.cpp
     code/Button/GPIOButton.hpp
@@ -46,80 +47,85 @@ add_library(TTSController
 )
 target_include_directories(TTSController PUBLIC code/syn6288_controller)
 
-add_library(MJPEGServer
-    code/camera/mjpeg_server.cpp
-    code/camera/mjpeg_server.hpp
-)
-target_include_directories(MJPEGServer PUBLIC code/camera)
-
 add_library(LEDController
     code/LED/LEDController.cpp
     code/LED/LEDController.hpp
 )
 target_include_directories(LEDController PUBLIC code/LED)
 
-# -- enable testing and add module tests --
+# the main executable (optional)
+add_executable(final_system
+    code/main.cpp
+    # …or list your other .cpp’s here…
+)
+target_link_libraries(final_system
+    GPIOButton MotorController LightSensor UltrasonicSensor
+    PIRController ECGProcessor TTSController LEDController
+    Threads::Threads gpiodcxx gpiod boost_system jpeg
+)
+
+# -- tests --
 enable_testing()
 
-# GPIOButton test
+# Button
 add_executable(test_gpio_button
     tests/Button/test_gpio_button.cpp
 )
-target_link_libraries(test_gpio_button PRIVATE GPIOButton pthread)
+target_link_libraries(test_gpio_button PRIVATE GPIOButton Threads::Threads)
 add_test(NAME GPIOButtonTest COMMAND test_gpio_button)
 
-# MotorController test
+# MotorController
 add_executable(test_motor_controller
-    tests/motor/test_motor_controller.cpp
+    tests/motor/Motor_test.cpp
 )
-target_link_libraries(test_motor_controller PRIVATE MotorController pthread)
+target_link_libraries(test_motor_controller PRIVATE MotorController Threads::Threads)
 add_test(NAME MotorControllerTest COMMAND test_motor_controller)
 
-# LightSensor test
+# LightSensor
 add_executable(test_light_sensor
-    tests/LightSensor/test_light_sensor.cpp
+    tests/LightSensor/test_lightsensor.cpp
 )
-target_link_libraries(test_light_sensor PRIVATE LightSensor pthread)
+target_link_libraries(test_light_sensor PRIVATE LightSensor Threads::Threads)
 add_test(NAME LightSensorTest COMMAND test_light_sensor)
 
-# UltrasonicSensor test
+# UltrasonicSensor
 add_executable(test_ultrasonic_sensor
-    tests/UltrasonicSensor/test_ultrasonic_sensor.cpp
+    tests/UltrasonicSensor/test_ultrasonic.cpp
 )
-target_link_libraries(test_ultrasonic_sensor PRIVATE UltrasonicSensor pthread)
+target_link_libraries(test_ultrasonic_sensor PRIVATE UltrasonicSensor Threads::Threads)
 add_test(NAME UltrasonicSensorTest COMMAND test_ultrasonic_sensor)
 
-# PIRController test
+# PIRController
 add_executable(test_pir_controller
-    tests/pir_sensor/test_pir_sensor.cpp
+    tests/pir_sensor/test_pir.cpp
 )
-target_link_libraries(test_pir_controller PRIVATE PIRController pthread)
+target_link_libraries(test_pir_controller PRIVATE PIRController Threads::Threads)
 add_test(NAME PIRControllerTest COMMAND test_pir_controller)
 
-# ECGProcessor test
+# ECGProcessor
 add_executable(test_ecg_processor
-    tests/ecg_processor/test_ecg_processor.cpp
+    tests/ecg_processor/test_ecg.cpp
 )
-target_link_libraries(test_ecg_processor PRIVATE ECGProcessor pthread)
+target_link_libraries(test_ecg_processor PRIVATE ECGProcessor Threads::Threads)
 add_test(NAME ECGProcessorTest COMMAND test_ecg_processor)
 
-# TTSController test
+# TTSController
 add_executable(test_tts_controller
-    tests/syn6288_controller/test_syn6288_controller.cpp
+    tests/syn6288_controller/test_syn6288.cpp
 )
-target_link_libraries(test_tts_controller PRIVATE TTSController pthread)
+target_link_libraries(test_tts_controller PRIVATE TTSController Threads::Threads)
 add_test(NAME TTSControllerTest COMMAND test_tts_controller)
 
-# MJPEGServer test
-add_executable(test_mjpeg_server
-    tests/camera/test_mjpeg_server.cpp
-)
-target_link_libraries(test_mjpeg_server PRIVATE MJPEGServer pthread)
-add_test(NAME MJPEGServerTest COMMAND test_mjpeg_server)
-
-# LEDController test
+# LEDController
 add_executable(test_led_controller
-    tests/LED/test_led_controller.cpp
+    tests/LED/test_led.cpp
 )
-target_link_libraries(test_led_controller PRIVATE LEDController pthread)
+target_link_libraries(test_led_controller PRIVATE LEDController Threads::Threads)
 add_test(NAME LEDControllerTest COMMAND test_led_controller)
+
+# HTTPServer (optional—you can drop this if you don't have matching source)
+# add_executable(test_http_server
+#     tests/http_server/sensor_http_server.cpp
+#)
+# target_link_libraries(test_http_server PRIVATE Threads::Threads)
+# add_test(NAME HTTPServerTest COMMAND test_http_server)
