@@ -207,13 +207,13 @@ All five module tests passed successfully in a total of 8.47 seconds, yielding 
 
 ## 🧱 Module‑Level Compilation
 
-Manual, module‑level compilation via direct **g++ commands** offers a lightweight alternative to CMake’s meta‑build approach: you get instant, one‑off builds of just the component you’re working on without maintaining a full CMakeLists.txt, and you can tweak compiler flags or include paths on the fly. This immediacy speeds up **quick debug cycles** and isolates **individual tests**, but it forgoes CMake’s automatic dependency resolution, out‑of‑source build cleanliness, and integrated test orchestration that scale better for larger projects.
+Manual, module‑level compilation via direct **g++ commands** offers a **lightweight** alternative to CMake’s meta‑build approach: you get instant, one‑off builds of just the component you’re working on without maintaining a full CMakeLists.txt, and you can tweak compiler flags or include paths on the fly. This immediacy speeds up **quick debug cycles** and isolates **individual tests**, but it forgoes CMake’s automatic dependency resolution, out‑of‑source build cleanliness, and integrated test orchestration that scale better for larger projects.
 For example, to compile only the GPIOButton test and its implementation in one go:
 <p align="center">
   <img src="https://github.com/user-attachments/assets/1da0a599-ee9c-4524-80e9-a2cb42408c63" width="50%" alt="Raspberry Pi" />
 </p>
 
-To compile the GPIOButton test by hand in one step, you can run:
+To compile the GPIOButton test by hand in **one step**, you can run:
 ```bash
 g++ -std=c++17 test_gpio_button.cpp GPIOButton.cpp -o test_gpio_button -lpthread
 ```
