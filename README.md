@@ -170,8 +170,27 @@ g++ -std=c++17 \
 
 ---
 
-##📦 CMake Build & Test
-
+## 📦 CMake Build & Test
+- enter electric-wheelchair directory
+  ```bash
+  cd Electric-wheelchair/electric-wheelchair
+  ```
+Create and enter a clean build directory
+```bash
+mkdir -p build && cd build
+```
+Configure the project, locating dependencies (libgpiod, libcamera, libjpeg…)
+```bash
+cmake ..
+```
+Compile all modules in parallel
+```bash
+make -j4
+```
+Run the full test suite, showing failures immediately
+```bash
+ctest --output-on-failure
+```
 ---
 
 ## 🚀 System Validation
