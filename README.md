@@ -197,6 +197,8 @@ ctest --output-on-failure
 ```
 
 ### **2. Result**
+
+All five module tests passed successfully in a total of 8.47 seconds, yielding a 100 % pass rate with zero failures. The MotorControllerTest ran longest (3.60 s) due to its interactive GPIO operations, while the UltrasonicSensorTest completed almost instantaneously (0.01 s). ECGProcessorTest and TTSControllerTest took about 2.02 s and 1.64 s respectively, reflecting their serial I/O workloads, and LEDControllerTest finished in 1.20 s. These results confirm that our CMake build, dependency linking, and test harness adjustments are all correct.
 <p align="center">
   <img src="https://github.com/user-attachments/assets/1a474d52-c200-477b-9fbe-738ebe86034e" width="50%" alt="Raspberry Pi" />
 </p>
