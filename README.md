@@ -171,10 +171,10 @@ g++ -std=c++17 \
 ---
 
 ## 📦 CMake Build & Test
-- enter electric-wheelchair directory
-  ```bash
-  cd Electric-wheelchair/electric-wheelchair
-  ```
+Enter electric-wheelchair directory
+```bash
+cd Electric-wheelchair/electric-wheelchair
+```
 Create and enter a clean build directory
 ```bash
 mkdir -p build && cd build
