@@ -1,203 +1,181 @@
 cmake_minimum_required(VERSION 3.10)
-project(ElectricWheelchair)
+project(ElectricWheelchair LANGUAGES C CXX)
 
+# Require C++17
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
+# Threads
 find_package(Threads REQUIRED)
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(LIBC_GPIODCXX REQUIRED libgpiodcxx)   # C++ binding for libgpiod
-pkg_check_modules(LIBC_GPIOD    REQUIRED libgpiod)      # C API for libgpiod
-pkg_check_modules(LIBC_LIBCAMERA REQUIRED libcamera)    # for MJPEGServer
-find_package(Boost REQUIRED COMPONENTS system thread)   # for Boost.Asio
 
+# libgpiod C++ API
+pkg_check_modules(GPIO_CXX REQUIRED libgpiodcxx)
+# libgpiod C API
+pkg_check_modules(GPIO_C   REQUIRED libgpiod)
+# libcamera (for MJPEGServer)
+pkg_check_modules(LIBC     REQUIRED libcamera)
+# libjpeg (for MJPEGServer)
+pkg_check_modules(JPEG     REQUIRED libjpeg)
 
+# include dirs
 include_directories(
-  ${LIBC_GPIODCXX_INCLUDE_DIRS}
-  ${LIBC_GPIOD_INCLUDE_DIRS}
-  ${LIBC_LIBCAMERA_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
+  ${GPIO_CXX_INCLUDE_DIRS}
+  ${GPIO_C_INCLUDE_DIRS}
+  ${LIBC_INCLUDE_DIRS}
+  ${JPEG_INCLUDE_DIRS}
+  ${CMAKE_SOURCE_DIR}/code/Button
+  ${CMAKE_SOURCE_DIR}/code/motor
+  ${CMAKE_SOURCE_DIR}/code/LightSensor
+  ${CMAKE_SOURCE_DIR}/code/UltrasonicSensor
+  ${CMAKE_SOURCE_DIR}/code/pir_sensor
+  ${CMAKE_SOURCE_DIR}/code/ecg_processor
+  ${CMAKE_SOURCE_DIR}/code/syn6288_controller
+  ${CMAKE_SOURCE_DIR}/code/camera
+  ${CMAKE_SOURCE_DIR}/code/LED
 )
-
 
 link_directories(
-  ${LIBC_GPIODCXX_LIBRARY_DIRS}
-  ${LIBC_GPIOD_LIBRARY_DIRS}
-  ${LIBC_LIBCAMERA_LIBRARY_DIRS}
+  ${GPIO_CXX_LIBRARY_DIRS}
+  ${GPIO_C_LIBRARY_DIRS}
+  ${LIBC_LIBRARY_DIRS}
+  ${JPEG_LIBRARY_DIRS}
 )
 
+set(GPIOD_LIBS
+  ${GPIO_CXX_LIBRARIES}
+  ${GPIO_C_LIBRARIES}
+)
+set(CAMERA_LIBS
+  ${LIBC_LIBRARIES}
+)
+set(JPEG_LIBS
+  ${JPEG_LIBRARIES}
+)
 
-add_library(GPIOButton
+# --- Modules ---
+
+add_library(GPIOButton STATIC
   code/Button/GPIOButton.cpp
+  code/Button/GPIOButton.hpp
 )
-target_include_directories(GPIOButton PUBLIC code/Button)
-target_link_libraries(GPIOButton PUBLIC
-  ${LIBC_GPIODCXX_LIBRARIES}
-  ${LIBC_GPIOD_LIBRARIES}
-  Threads::Threads
+target_link_libraries(GPIOButton
+  PRIVATE ${GPIOD_LIBS} Threads::Threads
 )
 
-add_library(MotorController
+add_library(MotorController STATIC
   code/motor/MotorController.cpp
+  code/motor/MotorController.hpp
 )
-target_include_directories(MotorController PUBLIC code/motor)
-target_link_libraries(MotorController PUBLIC
-  ${LIBC_GPIODCXX_LIBRARIES}
-  ${LIBC_GPIOD_LIBRARIES}
+target_link_libraries(MotorController
+  PRIVATE ${GPIOD_LIBS} Threads::Threads
 )
-
-add_library(LightSensor
+add_library(LightSensor STATIC
   code/LightSensor/LightSensor.cpp
+  code/LightSensor/LightSensor.hpp
 )
-target_include_directories(LightSensor PUBLIC code/LightSensor)
-target_link_libraries(LightSensor PUBLIC Threads::Threads)
+target_link_libraries(LightSensor
+  PRIVATE ${GPIOD_LIBS} Threads::Threads
+)
 
-add_library(UltrasonicSensor
+add_library(UltrasonicSensor STATIC
   code/UltrasonicSensor/UltrasonicSensor.cpp
+  code/UltrasonicSensor/UltrasonicSensor.hpp
 )
-target_include_directories(UltrasonicSensor PUBLIC code/UltrasonicSensor)
-target_link_libraries(UltrasonicSensor PUBLIC Threads::Threads)
+target_link_libraries(UltrasonicSensor
+  PRIVATE ${GPIOD_LIBS} Threads::Threads
+)
 
-add_library(PIRController
+add_library(PIRController STATIC
   code/pir_sensor/pir_sensor.cpp
+  code/pir_sensor/pir_sensor.hpp
 )
-target_include_directories(PIRController PUBLIC code/pir_sensor)
-target_link_libraries(PIRController PUBLIC Threads::Threads)
+target_link_libraries(PIRController
+  PRIVATE ${GPIOD_LIBS} Threads::Threads
+)
 
-add_library(ECGProcessor
+add_library(ECGProcessor STATIC
   code/ecg_processor/ecg_processor.cpp
+  code/ecg_processor/ecg_processor.hpp
 )
-target_include_directories(ECGProcessor PUBLIC code/ecg_processor)
-target_link_libraries(ECGProcessor PUBLIC Threads::Threads)
+target_link_libraries(ECGProcessor
+  PRIVATE Threads::Threads
+)
 
-add_library(TTSController
+add_library(TTSController STATIC
   code/syn6288_controller/syn6288_controller.cpp
+  code/syn6288_controller/syn6288_controller.hpp
 )
-target_include_directories(TTSController PUBLIC code/syn6288_controller)
-target_link_libraries(TTSController PUBLIC Threads::Threads)
+target_link_libraries(TTSController
+  PRIVATE Threads::Threads
+)
 
-add_library(MJPEGServer
+add_library(MJPEGServer STATIC
   code/camera/mjpeg_server.cpp
+  code/camera/mjpeg_server.hpp
 )
-target_include_directories(MJPEGServer PUBLIC code/camera)
-target_link_libraries(MJPEGServer PUBLIC
-  ${LIBC_LIBCAMERA_LIBRARIES}
-  Boost::system
-  Threads::Threads
+target_link_libraries(MJPEGServer
+  PRIVATE ${CAMERA_LIBS} ${JPEG_LIBS} Threads::Threads
 )
 
-add_library(LEDController
+add_library(LEDController STATIC
   code/LED/LEDController.cpp
+  code/LED/LEDController.hpp
 )
-target_include_directories(LEDController PUBLIC code/LED)
-target_link_libraries(LEDController PUBLIC Threads::Threads)
-
-
-add_executable(final_system
-  code/main/main.cpp
-)
-target_link_libraries(final_system PUBLIC
-  GPIOButton MotorController LightSensor UltrasonicSensor PIRController
-  ECGProcessor TTSController MJPEGServer LEDController
-  ${Boost_LIBRARIES}
-  ${LIBC_LIBCAMERA_LIBRARIES}
-  Threads::Threads
+target_link_libraries(LEDController
+  PRIVATE ${GPIOD_LIBS} Threads::Threads
 )
 
+# --- Tests ---
 
 enable_testing()
 
-
-add_executable(test_gpio_button
-  tests/Button/test_gpio_button.cpp
-)
-target_link_libraries(test_gpio_button PRIVATE
-  GPIOButton
-  ${LIBC_GPIODCXX_LIBRARIES}
-  ${LIBC_GPIOD_LIBRARIES}
-  Threads::Threads
-)
-add_test(NAME GPIOButtonTest COMMAND test_gpio_button)
-
-
+# MotorController test
 add_executable(test_motor_controller
   tests/motor/Motor_test.cpp
 )
-target_link_libraries(test_motor_controller PRIVATE
-  MotorController
-  ${LIBC_GPIODCXX_LIBRARIES}
-  ${LIBC_GPIOD_LIBRARIES}
-  Threads::Threads
+target_link_libraries(test_motor_controller
+  PRIVATE MotorController ${GPIOD_LIBS} Threads::Threads
 )
 add_test(NAME MotorControllerTest COMMAND test_motor_controller)
+set_tests_properties(MotorControllerTest PROPERTIES TIMEOUT 5)
 
-
-add_executable(test_light_sensor
-  tests/LightSensor/test_light_sensor.cpp
-)
-target_link_libraries(test_light_sensor PRIVATE
-  LightSensor
-  Threads::Threads
-)
-add_test(NAME LightSensorTest COMMAND test_light_sensor)
-
-
+# UltrasonicSensor test
 add_executable(test_ultrasonic
   tests/UltrasonicSensor/test_ultrasonic.cpp
 )
-target_link_libraries(test_ultrasonic PRIVATE
-  UltrasonicSensor
-  Threads::Threads
+target_link_libraries(test_ultrasonic
+  PRIVATE UltrasonicSensor ${GPIOD_LIBS} Threads::Threads
 )
 add_test(NAME UltrasonicSensorTest COMMAND test_ultrasonic)
+set_tests_properties(UltrasonicSensorTest PROPERTIES TIMEOUT 5)
 
-
-add_executable(test_pir_controller
-  tests/pir_sensor/test_pir_sensor.cpp
-)
-target_link_libraries(test_pir_controller PRIVATE
-  PIRController
-  Threads::Threads
-)
-add_test(NAME PIRControllerTest COMMAND test_pir_controller)
-
-
-add_executable(test_ecg_processor
+# ECGProcessor test
+add_executable(test_ecg
   tests/ecg_processor/ecg_main.cpp
 )
-target_link_libraries(test_ecg_processor PRIVATE
-  ECGProcessor
-  Threads::Threads
+target_link_libraries(test_ecg
+  PRIVATE ECGProcessor Threads::Threads
 )
-add_test(NAME ECGProcessorTest COMMAND test_ecg_processor)
+add_test(NAME ECGProcessorTest COMMAND test_ecg)
+set_tests_properties(ECGProcessorTest PROPERTIES TIMEOUT 5)
 
-
+# TTSController test
 add_executable(test_tts
   tests/syn6288_controller/test_tts.cpp
 )
-target_link_libraries(test_tts PRIVATE
-  TTSController
-  Threads::Threads
+target_link_libraries(test_tts
+  PRIVATE TTSController Threads::Threads
 )
 add_test(NAME TTSControllerTest COMMAND test_tts)
+set_tests_properties(TTSControllerTest PROPERTIES TIMEOUT 5)
 
-
-add_executable(test_mjpeg_server
-  tests/camera/test_mjpeg_server.cpp
-)
-target_link_libraries(test_mjpeg_server PRIVATE
-  MJPEGServer
-  Threads::Threads
-)
-add_test(NAME MJPEGServerTest COMMAND test_mjpeg_server)
-
-
+# LEDController test
 add_executable(test_led
   tests/LED/test_led.cpp
 )
-target_link_libraries(test_led PRIVATE
-  LEDController
-  Threads::Threads
+target_link_libraries(test_led
+  PRIVATE LEDController ${GPIOD_LIBS} Threads::Threads
 )
 add_test(NAME LEDControllerTest COMMAND test_led)
+set_tests_properties(LEDControllerTest PROPERTIES TIMEOUT 5)
