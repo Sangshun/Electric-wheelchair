@@ -154,7 +154,7 @@ add_test(NAME UltrasonicSensorTest COMMAND test_ultrasonic)
 
 
 add_executable(test_pir_controller
-  tests/pir_sensor/test_pir.cpp
+  tests/pir_sensor/test_pir_sensor.cpp
 )
 target_link_libraries(test_pir_controller PRIVATE
   PIRController
