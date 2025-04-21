@@ -173,30 +173,30 @@ g++ -std=c++17 \
 ## 📦 CMake Build & Test
 CMake is a cross‑platform build system generator that streamlines dependency discovery (e.g., libgpiod, libcamera, libjpeg), supports out‑of‑source builds to keep your source tree clean, and lets you organize each hardware or controller module into its own target. By integrating with CTest, it enables automated execution of unit tests and clear reporting of failures. In this project, CMake has been used to build and test individual components—MotorController, UltrasonicSensor, ECGProcessor, LEDController, TTSController, MJPEGServer, GPIOButton, LightSensor and PIRController—and to assemble them into a cohesive final_system executable.
 
-**Build & Test Commands**
+**1. Build & Test Commands**
 
-**1. Enter electric-wheelchair directory**
+**Enter electric-wheelchair directory**
 ```bash
 cd Electric-wheelchair/electric-wheelchair
 ```
-**2. Create and enter a clean build directory**
+**Create and enter a clean build directory**
 ```bash
 mkdir -p build && cd build
 ```
-**3. Configure the project, locating dependencies (libgpiod, libcamera, libjpeg…)**
+**Configure the project, locating dependencies (libgpiod, libcamera, libjpeg…)**
 ```bash
 cmake ..
 ```
-**4. Compile all modules in parallel**
+**Compile all modules in parallel**
 ```bash
 make -j4
 ```
-**5. Run the full test suite, showing failures immediately**
+**Run the full test suite, showing failures immediately**
 ```bash
 ctest --output-on-failure
 ```
 
-**Result**
+**2. Result**
 <p align="center">
   <img src="https://github.com/user-attachments/assets/1a474d52-c200-477b-9fbe-738ebe86034e" width="50%" alt="Raspberry Pi" />
 </p>
